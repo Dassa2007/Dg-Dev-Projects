@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Subtitle Translator - DG-DEV PROJECTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Abhaya+Libre:wght@400;500;600;700&family=Yaldevi:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>(function(){const t=localStorage.getItem('dgdev-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<style>
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:40px 20px;text-align:center;cursor:pointer;transition:all .3s;background:var(--card)}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--primary);background:var(--bg-2)}
+.files-list{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+.file-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;font-size:.88rem}
+.progress-log{margin-top:16px;padding:12px;background:var(--bg-2);border-radius:12px;max-height:250px;overflow-y:auto;font-size:.85rem}
+.log-line{padding:4px 0}
+</style>
+</head>
+<body>
+<main class="page-container">
+  <h1 class="page-title">Subtitles Translator 🌐</h1>
+  <p class="page-subtitle">Translate SRT, VTT, ASS subtitle files using Google Translate.</p>
+  <div class="upload-zone" id="uploadZone">
+    <div style="font-size:2.5rem">📁</div>
+    <p><strong>Click or drag & drop</strong> subtitle files</p>
+    <p style="font-size:.85rem;color:var(--text-muted)">Supports .srt, .vtt, .ass · Multiple files allowed</p>
+    <input type="file" id="fileInput" multiple accept=".srt,.vtt,.ass" style="display:none">
+  </div>
+  <div class="files-list" id="filesList"></div>
+  <div class="card" style="margin-top:24px">
+    <div class="form-group">
+      <label class="form-label">Target Language</label>
+      <select class="form-select" id="langSelect">
+        <option value="si">Sinhala (සිංහල)</option><option value="en">English</option>
+        <option value="ta">Tamil</option><option value="hi">Hindi</option>
+        <option value="ar">Arabic</option><option value="fr">French</option>
+        <option value="de">German</option><option value="es">Spanish</option>
+        <option value="ja">Japanese</option><option value="ko">Korean</option>
+        <option value="zh-CN">Chinese</option><option value="ru">Russian</option>
+        <option value="pt">Portuguese</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Output Font (Sinhala):</label>
+      <select class="form-select" id="fontSelect">
+        <option value="Noto Sans Sinhala">Noto Sans Sinhala</option>
+        <option value="Iskoola Pota">Iskoola Pota</option>
+        <option value="Abhaya Libre">Abhaya Libre</option>
+        <option value="Yaldevi">Yaldevi</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Subtitle Color:</label>
+      <input type="color" id="colorPicker" value="#ffffff" style="width:60px;height:40px;border-radius:10px;border:1px solid var(--border);cursor:pointer">
+    </div>
+    <button class="btn-primary" id="translateBtn" style="width:100%">🌐 Translate All Files</button>
+    <div class="progress-log" id="progressLog"></div>
+  </div>
+</main>
+<script src="main.js"></script>
+<script>
+(function(){
+  const zone=document.getElementById('uploadZone'),input=document.getElementById('fileInput'),filesList=document.getElementById('filesList'),langSelect=document.getElementById('langSelect'),fontSelect=document.getElementById('fontSelect'),colorPicker=document.getElementById('colorPicker'),translateBtn=document.getElementById('translateBtn'),progressLog=document.getElementById('progressLog');
+  let files=[];
+  zone.onclick=()=>input.click();
+  zone.ondragover=e=>{e.preventDefault();zone.classList.add('dragover')};
+  zone.ondragleave=()=>zone.classList.remove('dragover');
+  zone.ondrop=e=>{e.preventDefault();zone.classList.remove('dragover');addFiles([...e.dataTransfer.files])};
+  input.onchange=e=>addFiles([...e.target.files]);
+  function addFiles(nf){nf.forEach(f=>{const ext=f.name.split('.').pop().toLowerCase();if(['srt','vtt','ass'].includes(ext))files.push({file:f,name:f.name,ext})});renderFiles()}
+  function renderFiles(){filesList.innerHTML=files.map((f,i)=>`<div class="file-item"><span>📄 ${f.name} <small style="color:var(--text-muted)">(${f.ext.toUpperCase()})</small></span><button class="btn-secondary" style="padding:4px 10px;font-size:.8rem" data-remove="${i}">Remove</button></div>`).join('');filesList.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{files.splice(+b.dataset.remove,1);renderFiles()})}
+  function log(m){const d=document.createElement('div');d.className='log-line';d.textContent=m;progressLog.appendChild(d);progressLog.scrollTop=progressLog.scrollHeight}
+  translateBtn.onclick=async()=>{
+    if(!files.length){window.dgdevToast('Add subtitle files first','error');return}
+    translateBtn.disabled=true;translateBtn.textContent='⏳ Translating...';
+    progressLog.innerHTML='';
+    const tl=langSelect.value,font=fontSelect.value,color=colorPicker.value;
+    for(const f of files){
+      log(`🔄 Processing ${f.name}...`);
+      try{
+        const text=await f.file.text();let cues;
+        if(f.ext==='srt')cues=parseSRT(text);else if(f.ext==='vtt')cues=parseVTT(text);else cues=parseASS(text);
+        if(!cues||!cues.length){log(`⚠️ ${f.name}: no cues`);continue}
+        log(`📝 ${cues.length} lines. Translating...`);
+        for(let i=0;i<cues.length;i++){
+          try{cues[i].text=await translateText(cues[i].text,tl);if(i%5===0)log(`  → ${i+1}/${cues.length}`);await new Promise(r=>setTimeout(r,250))}catch(e){log(`  ⚠️ Skipped line ${i+1}`)}
+        }
+        let out;
+        if(f.ext==='srt')out=serSRT(cues);else if(f.ext==='vtt')out=serVTT(cues);else out=serASS(cues,color,font);
+        const base=f.name.replace(/\.[^.]+$/,'');
+        downloadText(out,`${base}_${tl}_DG-DEV.${f.ext}`);
+        log(`✅ ${base}_${tl}_DG-DEV.${f.ext} downloaded`);
+      }catch(err){log(`❌ Error: ${err.message}`)}
+    }
+    log('🎉 All done!');
+    window.dgdevToast('All files translated ✅');
+    translateBtn.disabled=false;translateBtn.textContent='🌐 Translate All Files';
+  };
+  async function translateText(text,tl){
+    if(!text||!text.trim())return text;
+    const url=`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${tl}&dt=t&q=${encodeURIComponent(text)}`;
+    const res=await fetch(url);if(!res.ok)throw new Error('Translate failed');
+    const data=await res.json();return data[0].map(x=>x[0]).join('');
+  }
+  function parseSRT(t){return t.replace(/\r/g,'').trim().split(/\n\s*\n/).map(b=>{const L=b.split('\n'),tl=L.find(l=>l.includes('-->'));if(!tl)return null;const[s,e]=tl.split('-->').map(x=>x.trim());return{start:pT(s,','),end:pT(e,','),text:L.slice(L.indexOf(tl)+1).join('\n')}}).filter(Boolean)}
+  function parseVTT(t){return t.replace(/\r/g,'').replace(/^WEBVTT[^\n]*\n/,'').trim().split(/\n\s*\n/).map(b=>{const L=b.split('\n'),i=L.findIndex(l=>l.includes('-->'));if(i<0)return null;const[s,e]=L[i].split('-->').map(x=>x.trim().split(' ')[0]);return{start:pT(s,'.'),end:pT(e,'.'),text:L.slice(i+1).join('\n')}}).filter(Boolean)}
+  function parseASS(t){const L=t.replace(/\r/g,'').split('\n'),ev=[];let inEv=false;for(const l of L){if(l.startsWith('[Events]')){inEv=true;continue}if(inEv&&l.startsWith('[')&&l!=='[Events]')break;if(inEv&&l.startsWith('Dialogue:')){const p=l.substring(9).split(',');if(p.length>=10)ev.push({start:pT(p[1].trim(),'.'),end:pT(p[2].trim(),'.'),text:p.slice(9).join(',').replace(/\\N/g,'\n').replace(/\{[^}]*\}/g,'')})}}return ev}
+  function pT(t,sep){const p=t.split(':');if(p.length===3){const[h,m]=p,[s,ms]=p[2].split(sep);return(h*3600+m*60+ +s)*1000+(+ms||0)*(ms&&ms.length===2?10:1)}return 0}
+  const pad=n=>String(n).padStart(2,'0');
+  function fSRT(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000),r=ms%1000;return`${pad(h)}:${pad(m)}:${pad(s)},${String(r).padStart(3,'0')}`}
+  function fVTT(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000),r=ms%1000;return`${pad(h)}:${pad(m)}:${pad(s)}.${String(r).padStart(3,'0')}`}
+  function fASS(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000),c=Math.floor(ms%1000/10);return`${h}:${pad(m)}:${pad(s)}.${pad(c)}`}
+  function serSRT(c){return c.map((x,i)=>`${i+1}\n${fSRT(x.start)} --> ${fSRT(x.end)}\n${x.text}`).join('\n\n')}
+  function serVTT(c){return`WEBVTT\n\n`+c.map(x=>`${fVTT(x.start)} --> ${fVTT(x.end)}\n${x.text}`).join('\n\n')}
+  function serASS(c,hex,font){const col=hexToASS(hex);return`[Script Info]\nTitle: DG-DEV Translated\nScriptType: v4.00+\nPlayResX: 1920\nPlayResY: 1080\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\nStyle: Default,${font},56,${col},&H000000FF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,2,2,2,10,10,30,1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n`+c.map(x=>`Dialogue: 0,${fASS(x.start)},${fASS(x.end)},Default,,0,0,0,,${x.text.replace(/\n/g,'\\N')}`).join('\n')}
+  function hexToASS(h){h=h.replace('#','');return`&H00${h.substring(4,6)}${h.substring(2,4)}${h.substring(0,2)}`.toUpperCase()}
+  function downloadText(t,n){const b=new Blob([t],{type:'text/plain'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+})();
+</script>
+</body>
+  </html>
