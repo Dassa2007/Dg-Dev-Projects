@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Subtitle Converter - DG-DEV PROJECTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>(function(){const t=localStorage.getItem('dgdev-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<style>
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:40px 20px;text-align:center;cursor:pointer;transition:all .3s;background:var(--card)}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--primary);background:var(--bg-2)}
+.convert-types{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:20px 0}
+.conv-btn{padding:14px;background:var(--card);border:2px solid var(--border);border-radius:10px;cursor:pointer;font-weight:700;font-size:.85rem;transition:all .2s;font-family:inherit;color:var(--text)}
+.conv-btn.active{background:var(--accent-grad);color:#fff;border-color:transparent}
+.conv-btn:hover{border-color:var(--primary)}
+.files-list{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+.file-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;font-size:.88rem}
+.color-row{display:flex;align-items:center;gap:10px}
+.color-row input[type=color]{width:50px;height:36px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:transparent}
+</style>
+</head>
+<body>
+<main class="page-container">
+  <h1 class="page-title">Subtitle Converter 🔄</h1>
+  <p class="page-subtitle">Convert SRT ↔ VTT ↔ ASS with DG-DEV watermark on filenames.</p>
+  <div class="upload-zone" id="uploadZone">
+    <div style="font-size:2.5rem">📁</div>
+    <p><strong>Click or drag & drop</strong> subtitle files</p>
+    <p style="font-size:.85rem;color:var(--text-muted)">Supports .srt, .vtt, .ass · Multiple files allowed</p>
+    <input type="file" id="fileInput" multiple accept=".srt,.vtt,.ass" style="display:none">
+  </div>
+  <div class="files-list" id="filesList"></div>
+  <div class="card" style="margin-top:24px">
+    <h3 style="margin-bottom:12px">Conversion Type</h3>
+    <div class="convert-types">
+      <button class="conv-btn" data-type="srt2ass">SRT → ASS</button>
+      <button class="conv-btn" data-type="ass2srt">ASS → SRT</button>
+      <button class="conv-btn" data-type="srt2vtt">SRT → VTT</button>
+      <button class="conv-btn" data-type="vtt2srt">VTT → SRT</button>
+      <button class="conv-btn" data-type="ass2vtt">ASS → VTT</button>
+      <button class="conv-btn" data-type="vtt2ass">VTT → ASS</button>
+    </div>
+    <div class="form-group color-row">
+      <label class="form-label" style="margin:0">Subtitle Color (ASS only):</label>
+      <input type="color" id="colorPicker" value="#ffffff">
+    </div>
+    <button class="btn-primary" id="convertBtn" style="width:100%">🔄 Convert & Download All</button>
+  </div>
+</main>
+<script src="main.js"></script>
+<script>
+(function(){
+  const zone=document.getElementById('uploadZone'),input=document.getElementById('fileInput'),filesList=document.getElementById('filesList'),colorPicker=document.getElementById('colorPicker'),convertBtn=document.getElementById('convertBtn');
+  let files=[],convType=null;
+  zone.onclick=()=>input.click();
+  zone.ondragover=e=>{e.preventDefault();zone.classList.add('dragover')};
+  zone.ondragleave=()=>zone.classList.remove('dragover');
+  zone.ondrop=e=>{e.preventDefault();zone.classList.remove('dragover');addFiles([...e.dataTransfer.files])};
+  input.onchange=e=>addFiles([...e.target.files]);
+  document.querySelectorAll('.conv-btn').forEach(btn=>btn.onclick=()=>{
+    document.querySelectorAll('.conv-btn').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');convType=btn.dataset.type;
+  });
+  function addFiles(nf){
+    nf.forEach(f=>{const ext=f.name.split('.').pop().toLowerCase();if(['srt','vtt','ass'].includes(ext))files.push({file:f,name:f.name,ext})});
+    renderFiles();
+  }
+  function renderFiles(){
+    filesList.innerHTML=files.map((f,i)=>`<div class="file-item"><span>📄 ${f.name} <small style="color:var(--text-muted)">(${f.ext.toUpperCase()})</small></span><button class="btn-secondary" style="padding:4px 10px;font-size:.8rem" data-remove="${i}">Remove</button></div>`).join('');
+    filesList.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{files.splice(+b.dataset.remove,1);renderFiles()});
+  }
+  convertBtn.onclick=async()=>{
+    if(!files.length){window.dgdevToast('Add at least one file','error');return}
+    if(!convType){window.dgdevToast('Choose conversion type','error');return}
+    const [from,to]=convType.split('2');let count=0;
+    for(const f of files){
+      if(f.ext!==from)continue;
+      const text=await f.file.text();
+      let cues;
+      try{if(from==='srt')cues=parseSRT(text);else if(from==='vtt')cues=parseVTT(text);else cues=parseASS(text)}catch(e){continue}
+      if(!cues||!cues.length)continue;
+      let out;
+      if(to==='srt')out=serSRT(cues);else if(to==='vtt')out=serVTT(cues);else out=serASS(cues,colorPicker.value);
+      const base=f.name.replace(/\.[^.]+$/,'');
+      downloadText(out,`${base}_converted_DG-DEV.${to}`);
+      count++;await new Promise(r=>setTimeout(r,250));
+    }
+    window.dgdevToast(count?`Converted ${count} file(s) ✅`:'No matching files',count?'success':'error');
+  };
+  function parseSRT(t){return t.replace(/\r/g,'').trim().split(/\n\s*\n/).map(b=>{const L=b.split('\n'),tl=L.find(l=>l.includes('-->'));if(!tl)return null;const[s,e]=tl.split('-->').map(x=>x.trim());return{start:pT(s,','),end:pT(e,','),text:L.slice(L.indexOf(tl)+1).join('\n')}}).filter(Boolean)}
+  function parseVTT(t){return t.replace(/\r/g,'').replace(/^WEBVTT[^\n]*\n/,'').trim().split(/\n\s*\n/).map(b=>{const L=b.split('\n'),i=L.findIndex(l=>l.includes('-->'));if(i<0)return null;const[s,e]=L[i].split('-->').map(x=>x.trim().split(' ')[0]);return{start:pT(s,'.'),end:pT(e,'.'),text:L.slice(i+1).join('\n')}}).filter(Boolean)}
+  function parseASS(t){const L=t.replace(/\r/g,'').split('\n'),ev=[];let inEv=false;for(const l of L){if(l.startsWith('[Events]')){inEv=true;continue}if(inEv&&l.startsWith('[')&&l!=='[Events]')break;if(inEv&&l.startsWith('Dialogue:')){const p=l.substring(9).split(',');if(p.length>=10)ev.push({start:pT(p[1].trim(),'.'),end:pT(p[2].trim(),'.'),text:p.slice(9).join(',').replace(/\\N/g,'\n').replace(/\{[^}]*\}/g,'')})}}return ev}
+  function pT(t,sep){const p=t.split(':');if(p.length===3){const[h,m]=p,[s,ms]=p[2].split(sep);return(h*3600+m*60+ +s)*1000+(+ms||0)*(ms&&ms.length===2?10:1)}return 0}
+  const pad=n=>String(n).padStart(2,'0');
+  function fSRT(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000),r=ms%1000;return`${pad(h)}:${pad(m)}:${pad(s)},${String(r).padStart(3,'0')}`}
+  function fVTT(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000),r=ms%1000;return`${pad(h)}:${pad(m)}:${pad(s)}.${String(r).padStart(3,'0')}`}
+  function fASS(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000),c=Math.floor(ms%1000/10);return`${h}:${pad(m)}:${pad(s)}.${pad(c)}`}
+  function serSRT(c){return c.map((x,i)=>`${i+1}\n${fSRT(x.start)} --> ${fSRT(x.end)}\n${x.text}`).join('\n\n')}
+  function serVTT(c){return`WEBVTT\n\n`+c.map(x=>`${fVTT(x.start)} --> ${fVTT(x.end)}\n${x.text}`).join('\n\n')}
+  function serASS(c,hex){const col=hexToASS(hex);return`[Script Info]\nTitle: DG-DEV Converted\nScriptType: v4.00+\nPlayResX: 1920\nPlayResY: 1080\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\nStyle: Default,Arial,56,${col},&H000000FF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,2,2,2,10,10,30,1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n`+c.map(x=>`Dialogue: 0,${fASS(x.start)},${fASS(x.end)},Default,,0,0,0,,${x.text.replace(/\n/g,'\\N')}`).join('\n')}
+  function hexToASS(h){h=h.replace('#','');return`&H00${h.substring(4,6)}${h.substring(2,4)}${h.substring(0,2)}`.toUpperCase()}
+  function downloadText(t,n){const b=new Blob([t],{type:'text/plain'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+})();
+</script>
+</body>
+</html>
