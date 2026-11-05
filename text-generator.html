@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Text Generator - DG-DEV PROJECTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>(function(){const t=localStorage.getItem('dgdev-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<style>
+.output-list{display:flex;flex-direction:column;gap:8px;margin-top:20px;max-height:500px;overflow-y:auto;padding-right:4px}
+.output-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px;animation:outIn .3s}
+@keyframes outIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.output-text{flex:1;font-size:.95rem;word-break:break-word}
+.copy-btn{padding:6px 14px;background:var(--accent-grad);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:.8rem}
+.top-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.top-row>*{flex:1;min-width:140px}
+.btn-wrapper{position:relative;display:inline-block}
+.btn{--border-radius:24px;--padding:4px;--transition:0.4s;--button-color:#101010;--highlight-color-hue:210deg;user-select:none;display:flex;justify-content:center;padding:0.5em 0.5em 0.5em 1.1em;font-family:"Poppins","Inter",sans-serif;font-size:1em;font-weight:400;background-color:var(--button-color);color:#fff;box-shadow:inset 0 1px 1px #fff3,inset 0 2px 2px #fff2,inset 0 4px 4px #fff1,0 -1px 1px #0001;border:solid 1px #fff2;border-radius:var(--border-radius);cursor:pointer;position:relative}
+.btn::before{content:"";position:absolute;top:calc(0px - var(--padding));left:calc(0px - var(--padding));width:calc(100% + var(--padding) * 2);height:calc(100% + var(--padding) * 2);border-radius:calc(var(--border-radius) + var(--padding));pointer-events:none;background:linear-gradient(0deg,#0004,#000a);z-index:-1}
+.btn-letter{position:relative;display:inline-block;color:#fff5;animation:letter-anim 2s ease-in-out infinite}
+@keyframes letter-anim{50%{text-shadow:0 0 3px #fff8;color:#fff}}
+.btn-svg{flex-grow:1;height:24px;margin-right:0.5rem;fill:#e8e8e8;animation:flicker 2s linear infinite;animation-delay:0.5s}
+@keyframes flicker{50%{opacity:0.3}}
+.txt-wrapper{position:relative;display:flex;align-items:center;min-width:6.4em}
+.txt-1,.txt-2{position:absolute;word-spacing:-1em}
+.txt-1{animation:appear-anim 1s ease-in-out forwards}
+.txt-2{opacity:0}
+@keyframes appear-anim{0%{opacity:0}100%{opacity:1}}
+.btn:focus .txt-1{animation:opacity-anim 0.3s ease-in-out forwards;animation-delay:1s}
+.btn:focus .txt-2{animation:opacity-anim 0.3s ease-in-out reverse forwards;animation-delay:1s}
+@keyframes opacity-anim{0%{opacity:1}100%{opacity:0}}
+.btn:focus .btn-letter{animation:focused-letter-anim 1s ease-in-out forwards,letter-anim 1.2s ease-in-out infinite;animation-delay:0s,1s}
+@keyframes focused-letter-anim{0%,100%{filter:blur(0)}50%{transform:scale(2);filter:blur(10px) brightness(150%) drop-shadow(-36px 12px 12px hsl(var(--highlight-color-hue),100%,70%))}}
+.btn:hover{border:solid 1px hsla(var(--highlight-color-hue),100%,80%,40%)}
+</style>
+</head>
+<body>
+<main class="page-container">
+  <h1 class="page-title">Unlimited Text Generator ✍️</h1>
+  <p class="page-subtitle">Generate unlimited copies of any text. Copy all with one click.</p>
+  <div class="card">
+    <div class="form-group">
+      <label class="form-label">Your Message</label>
+      <textarea class="form-textarea" id="messageInput" rows="4" placeholder="Type your message here..."></textarea>
+    </div>
+    <div class="top-row">
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Quantity</label>
+        <select class="form-select" id="qtySelect">
+          <option value="10">10</option><option value="25">25</option>
+          <option value="50" selected>50</option><option value="100">100</option>
+          <option value="200">200</option><option value="500">500</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Font</label>
+        <select class="form-select" id="fontSelect">
+          <option value="Inter">Inter</option>
+          <option value="Noto Sans Sinhala">Noto Sans Sinhala</option>
+          <option value="Poppins">Poppins</option>
+          <option value="Arial">Arial</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Courier New">Courier New</option>
+        </select>
+      </div>
+    </div>
+    <div style="text-align:center;margin:20px 0">
+      <div class="btn-wrapper">
+        <button class="btn" id="genBtn" type="button">
+          <svg class="btn-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/></svg>
+          <div class="txt-wrapper">
+            <div class="txt-1"><span class="btn-letter">G</span><span class="btn-letter">e</span><span class="btn-letter">n</span><span class="btn-letter">e</span><span class="btn-letter">r</span><span class="btn-letter">a</span><span class="btn-letter">t</span><span class="btn-letter">e</span></div>
+            <div class="txt-2"><span class="btn-letter">G</span><span class="btn-letter">e</span><span class="btn-letter">n</span><span class="btn-letter">e</span><span class="btn-letter">r</span><span class="btn-letter">a</span><span class="btn-letter">t</span><span class="btn-letter">i</span><span class="btn-letter">n</span><span class="btn-letter">g</span></div>
+          </div>
+        </button>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn-secondary" id="copyAllBtn">📋 Copy All</button>
+      <button class="btn-secondary" id="clearBtn">🗑️ Clear</button>
+    </div>
+    <div class="output-list" id="outputList"></div>
+  </div>
+</main>
+<script src="main.js"></script>
+<script>
+(function(){
+  const msgInput=document.getElementById('messageInput'),qtySelect=document.getElementById('qtySelect'),fontSelect=document.getElementById('fontSelect'),genBtn=document.getElementById('genBtn'),outputList=document.getElementById('outputList'),copyAllBtn=document.getElementById('copyAllBtn'),clearBtn=document.getElementById('clearBtn');
+  genBtn.onclick=()=>{
+    const msg=msgInput.value.trim(),qty=parseInt(qtySelect.value,10),font=fontSelect.value;
+    if(!msg){window.dgdevToast('Enter a message first','error');return}
+    outputList.innerHTML='';
+    for(let i=0;i<qty;i++){
+      const item=document.createElement('div');item.className='output-item';item.style.fontFamily=`'${font}',sans-serif`;
+      item.innerHTML='<span class="output-text"></span><button class="copy-btn">Copy</button>';
+      item.querySelector('.output-text').textContent=msg;
+      item.querySelector('.copy-btn').onclick=()=>{copyToClipboard(msg);window.dgdevToast('Copied ✅')};
+      outputList.appendChild(item);
+    }
+    window.dgdevToast(`Generated ${qty} copies ✅`);
+    setTimeout(()=>genBtn.blur(),1600);
+  };
+  copyAllBtn.onclick=()=>{
+    const items=[...outputList.querySelectorAll('.output-text')].map(e=>e.textContent);
+    if(!items.length){window.dgdevToast('Nothing to copy','error');return}
+    copyToClipboard(items.join('\n'));window.dgdevToast(`Copied ${items.length} items ✅`);
+  };
+  clearBtn.onclick=()=>{outputList.innerHTML='';window.dgdevToast('Cleared')};
+  function copyToClipboard(text){if(navigator.clipboard)navigator.clipboard.writeText(text).catch(()=>fallback(text));else fallback(text)}
+  function fallback(text){const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}t.remove()}
+})();
+</script>
+</body>
+</html>
