@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Image Cut - DG-DEV PROJECTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>(function(){const t=localStorage.getItem('dgdev-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<style>
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:60px 20px;text-align:center;cursor:pointer;transition:all .3s;background:var(--card)}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--primary);background:var(--bg-2)}
+.upload-icon{font-size:3rem;margin-bottom:12px}
+.tiles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:24px}
+.tile-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.tile-card img{width:100%;display:block}
+.tile-info{padding:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tile-info span{font-size:.85rem;color:var(--text-muted);font-weight:600}
+.tile-dl{padding:8px 14px;background:var(--accent-grad);color:#fff;border-radius:8px;font-size:.85rem;font-weight:600;border:none;cursor:pointer}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<main class="page-container">
+  <h1 class="page-title">Image Cut ✂️</h1>
+  <p class="page-subtitle">Upload a YouTube thumbnail or any image — it will split into 6 equal pieces with DG-DEV watermark.</p>
+  <div class="upload-zone" id="uploadZone">
+    <div class="upload-icon">📤</div>
+    <p><strong>Click to upload</strong> or drag & drop image</p>
+    <p style="font-size:.85rem;color:var(--text-muted);margin-top:8px;">Supports JPG, PNG, WEBP</p>
+    <input type="file" id="fileInput" accept="image/*" class="hidden">
+  </div>
+  <div id="results" class="hidden">
+    <h2 class="section-title" style="text-align:left;margin-top:30px;font-size:1.5rem;font-weight:700;">Your 6 Pieces</h2>
+    <div class="tiles-grid" id="tilesGrid"></div>
+  </div>
+</main>
+<script src="main.js"></script>
+<script>
+(function(){
+  const zone=document.getElementById('uploadZone'),input=document.getElementById('fileInput'),results=document.getElementById('results'),grid=document.getElementById('tilesGrid');
+  zone.onclick=()=>input.click();
+  zone.ondragover=e=>{e.preventDefault();zone.classList.add('dragover')};
+  zone.ondragleave=()=>zone.classList.remove('dragover');
+  zone.ondrop=e=>{e.preventDefault();zone.classList.remove('dragover');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])};
+  input.onchange=e=>{if(e.target.files[0])handleFile(e.target.files[0])};
+  async function handleFile(file){
+    if(!file.type.startsWith('image/')){window.dgdevToast('Please upload an image file','error');return}
+    const img=await loadImage(file);
+    const cols=3,rows=2,tileW=Math.floor(img.width/cols),tileH=Math.floor(img.height/rows);
+    grid.innerHTML='';let n=1;
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+      const canvas=document.createElement('canvas');canvas.width=tileW;canvas.height=tileH;
+      const ctx=canvas.getContext('2d');ctx.drawImage(img,c*tileW,r*tileH,tileW,tileH,0,0,tileW,tileH);
+      ctx.font=`bold ${Math.max(14,tileW/30)}px Inter,sans-serif`;ctx.fillStyle='rgba(255,255,255,.9)';ctx.strokeStyle='rgba(0,0,0,.55)';ctx.lineWidth=3;ctx.textAlign='right';ctx.textBaseline='bottom';
+      ctx.strokeText('DG-DEV',tileW-10,tileH-10);ctx.fillText('DG-DEV',tileW-10,tileH-10);
+      const dataUrl=canvas.toDataURL('image/png');
+      const card=document.createElement('div');card.className='tile-card';
+      card.innerHTML=`<img src="${dataUrl}" alt="Piece ${n}"><div class="tile-info"><span>Piece ${n} (R${r+1}C${c+1})</span><button class="tile-dl">Download</button></div>`;
+      card.querySelector('.tile-dl').onclick=()=>{const a=document.createElement('a');a.href=dataUrl;a.download=`dg-dev-cut-${n}.png`;a.click();window.dgdevToast(`Piece ${n} downloaded ✅`)};
+      grid.appendChild(card);n++;
+    }
+    results.classList.remove('hidden');window.dgdevToast('Image split into 6 pieces ✅');
+  }
+  function loadImage(file){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(file)})}
+})();
+</script>
+</body>
+</html>
