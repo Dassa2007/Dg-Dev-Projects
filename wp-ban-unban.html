@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WP Ban & Unban - DG-DEV PROJECTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>(function(){const t=localStorage.getItem('dgdev-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<style>
+.mode-tabs{display:flex;gap:10px;margin-bottom:20px}
+.mode-tab{flex:1;padding:14px;background:var(--card);border:2px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;font-weight:700;transition:all .2s}
+.mode-tab.active{background:var(--accent-grad);color:#fff;border-color:transparent}
+.codes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:16px}
+.code-btn{padding:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-weight:600;font-size:.85rem;transition:all .2s;position:relative;overflow:hidden;font-family:inherit;color:var(--text)}
+.code-btn::after{content:'DG-DEV';position:absolute;top:4px;right:6px;font-size:.55rem;font-weight:800;background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;opacity:.6}
+.code-btn:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:var(--shadow)}
+.code-btn.ban:hover{border-color:var(--danger)}
+.code-btn.unban:hover{border-color:var(--success)}
+</style>
+</head>
+<body>
+<main class="page-container">
+  <h1 class="page-title">WP Ban & Unban 🚫</h1>
+  <p class="page-subtitle">Enter a WhatsApp number, verify, choose mode, then tap a code to send the report.</p>
+  <div class="card" style="margin-bottom:24px">
+    <div class="form-group">
+      <label class="form-label">Enter WhatsApp Number</label>
+      <input type="tel" class="form-input" id="numberInput" placeholder="+94771234567">
+    </div>
+    <button class="btn-primary" id="verifyBtn">✅ Verify Number</button>
+  </div>
+  <div class="card" id="mainCard" style="display:none">
+    <div class="mode-tabs">
+      <div class="mode-tab active" data-mode="ban">🚫 Ban Number</div>
+      <div class="mode-tab" data-mode="unban">✅ Unban Number</div>
+    </div>
+    <p style="font-size:.9rem;color:var(--text-muted);margin-bottom:8px">Tap any code below to send a report/unban request via WhatsApp.</p>
+    <div class="codes-grid" id="codesGrid"></div>
+  </div>
+</main>
+<script src="main.js"></script>
+<script>
+(function(){
+  const BAN=["Hello WhatsApp Support, this number is sending spam messages. Please ban it. Number: {NUM}","Reporting {NUM} - this account is using abusive language. Please take action.","{NUM} is a fake account impersonating me. Please ban this number immediately.","Urgent: {NUM} is threatening and harassing me. Please ban.","{NUM} is running a scam on WhatsApp. Kindly ban this account.","This number {NUM} is involved in illegal activities. Please review and ban.","{NUM} is sending fraudulent links. Please ban this number.","I want to report {NUM} for sending inappropriate content. Ban please.","{NUM} is impersonating a business page. Please ban it.","Reporting {NUM} - they stole money from me via WhatsApp scam.","{NUM} is using stolen photos to scam people. Ban this account.","{NUM} keeps creating new accounts to harass me. Please ban permanently.","This number {NUM} is asking for OTPs - clearly a fraudster. Ban it.","{NUM} is sending explicit content. Please ban immediately.","Reporting {NUM} - the user tried to hack my WhatsApp. Please ban.","{NUM} is a bot sending hundreds of messages per minute. Ban please.","{NUM} posted my private info in a group. Please ban for privacy violation.","{NUM} is a hacked account spreading malware. Please ban.","Reporting {NUM} for repeated phishing attempts. Ban it.","{NUM} is using my name to scam my contacts. Please ban this account."];
+  const UNBAN=["Hi WhatsApp Support, my number {NUM} was banned by mistake. Please unban.","My number {NUM} is banned but I didn't violate any rules. Kindly restore access.","{NUM} - I'm a legitimate user. Please unban my WhatsApp account.","Hi Support, {NUM} was banned unfairly. I use it for business. Please unban.","This is my primary contact number {NUM}. Please unban and restore my chats.","I didn't do anything wrong with {NUM}. Please lift the ban.","Please unban {NUM} - I run a small business on this number.","I've been a WhatsApp user for years. My number {NUM} was wrongly banned. Please unban.","Hi, my number {NUM} is banned due to an automated mistake. Please restore.","{NUM} - I need my WhatsApp back for family contact. Please unban.","The ban on {NUM} was a misunderstanding. Please review and unban.","Please reconsider - {NUM} is used for important work. Restore access.","My {NUM} got banned after someone reported me falsely. Please unban.","Requesting unban of {NUM} - I have never spammed anyone.","{NUM} is my only WhatsApp number. Please unban kindly.","Unban request for {NUM}. I have important messages I can't access.","Please restore {NUM} - I need it for family and work communication.","My {NUM} was banned for no valid reason. Please reinstate.","{NUM} - I'm a genuine user, not a spammer. Please unban.","Kindly unban {NUM}. I'll follow all WhatsApp policies strictly."];
+  const numberInput=document.getElementById('numberInput'),verifyBtn=document.getElementById('verifyBtn'),mainCard=document.getElementById('mainCard'),codesGrid=document.getElementById('codesGrid');
+  let phone='',currentMode='ban';
+  verifyBtn.onclick=()=>{
+    const val=numberInput.value.trim().replace(/[^\d+]/g,'');
+    if(val.length<8){window.dgdevToast('Please enter a valid number','error');return}
+    phone=val.replace(/^\+/,'');
+    verifyBtn.textContent='✅ Verified: +'+phone;verifyBtn.disabled=true;numberInput.disabled=true;
+    mainCard.style.display='block';renderCodes();window.dgdevToast('Number verified ✅');
+  };
+  document.querySelectorAll('.mode-tab').forEach(t=>t.onclick=()=>{
+    document.querySelectorAll('.mode-tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');currentMode=t.dataset.mode;renderCodes();
+  });
+  function renderCodes(){
+    const templates=currentMode==='ban'?BAN:UNBAN;
+    codesGrid.innerHTML=templates.map((_,i)=>`<button class="code-btn ${currentMode}" data-idx="${i}">${currentMode==='ban'?'🚫':'✅'} Code ${i+1}</button>`).join('');
+    codesGrid.querySelectorAll('.code-btn').forEach(btn=>btn.onclick=()=>{
+      const idx=+btn.dataset.idx;
+      const msg=templates[idx].replace('{NUM}','+'+phone);
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
+      window.dgdevToast(`Opening WhatsApp with code ${idx+1}...`);
+    });
+  }
+})();
+</script>
+</body>
+</html>
