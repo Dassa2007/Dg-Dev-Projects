@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WhatsApp Report - DG-DEV PROJECTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>(function(){const t=localStorage.getItem('dgdev-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<style>
+.check-row{display:flex;align-items:flex-start;gap:10px;padding:14px;background:var(--bg-2);border-radius:12px;cursor:pointer}
+.check-row input{margin-top:3px;width:20px;height:20px;accent-color:var(--primary);cursor:pointer}
+.progress-box{display:none;margin-top:24px}
+.progress-box.active{display:block}
+.progress-bar{height:12px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:12px}
+.progress-fill{height:100%;background:var(--accent-grad);width:0%;transition:width .3s;border-radius:6px}
+.report-log{max-height:300px;overflow-y:auto;background:var(--bg-2);border-radius:12px;padding:12px;margin-top:12px}
+.report-item{padding:8px 12px;border-left:3px solid var(--success);margin-bottom:6px;background:var(--card);border-radius:6px;font-size:.88rem;animation:logIn .3s}
+@keyframes logIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+.watermark{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:.8rem;font-weight:800;letter-spacing:2px;background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;opacity:.5;pointer-events:none}
+</style>
+</head>
+<body>
+<main class="page-container">
+  <h1 class="page-title">WhatsApp Report ⚠️</h1>
+  <p class="page-subtitle">Report a WhatsApp number. Reports are sent every 3 seconds.</p>
+  <div class="card" style="max-width:640px;margin:0 auto">
+    <div class="form-group"><label class="form-label">WhatsApp Number to Report</label><input type="tel" class="form-input" id="numberInput" placeholder="+94771234567"></div>
+    <div class="form-group"><label class="check-row"><input type="checkbox" id="agreeCheck"><span>I confirm this number has violated WhatsApp policy and I agree this action is legitimate. I take full responsibility.</span></label></div>
+    <div class="form-group"><label class="form-label">Number of Reports (minimum 20)</label><input type="number" class="form-input" id="countInput" value="20" min="20" max="100"></div>
+    <button class="btn-primary" id="saveBtn">💾 Save & Continue</button>
+    <div class="progress-box" id="progressBox">
+      <button class="btn-primary" id="reportBtn" style="width:100%;margin-bottom:16px">🚨 Start Reporting</button>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <p style="text-align:center;font-weight:600" id="progressText">Ready</p>
+      <div class="report-log" id="reportLog"></div>
+    </div>
+  </div>
+  <div class="watermark">DG-DEV</div>
+</main>
+<script src="main.js"></script>
+<script>
+(function(){
+  const numberInput=document.getElementById('numberInput'),agreeCheck=document.getElementById('agreeCheck'),countInput=document.getElementById('countInput'),saveBtn=document.getElementById('saveBtn'),progressBox=document.getElementById('progressBox'),reportBtn=document.getElementById('reportBtn'),progressFill=document.getElementById('progressFill'),progressText=document.getElementById('progressText'),reportLog=document.getElementById('reportLog');
+  let phone='',count=20,running=false;
+  saveBtn.onclick=()=>{
+    const val=numberInput.value.trim().replace(/[^\d+]/g,'');
+    if(val.length<8){window.dgdevToast('Enter a valid number','error');return}
+    if(!agreeCheck.checked){window.dgdevToast('Please agree to the terms','error');return}
+    const c=parseInt(countInput.value,10);
+    if(!c||c<20){window.dgdevToast('Minimum 20 reports required','error');return}
+    phone=val.replace(/^\+/,'');count=c;
+    progressBox.classList.add('active');
+    window.dgdevToast('Saved. Ready to report ✅');
+  };
+  reportBtn.onclick=async()=>{
+    if(running)return;running=true;reportBtn.disabled=true;
+    reportLog.innerHTML='';progressFill.style.width='0%';
+    const reasons=['Spam messages','Fake account','Harassment','Scam / Fraud','Impersonation','Abusive behavior','Illegal activity','Phishing links','Sending OTP scams','Hacked account'];
+    for(let i=1;i<=count;i++){
+      await new Promise(r=>setTimeout(r,3000));
+      const pct=Math.round((i/count)*100);
+      progressFill.style.width=pct+'%';
+      progressText.textContent=`Report ${i} of ${count} sent (${pct}%)`;
+      const item=document.createElement('div');item.className='report-item';
+      item.textContent=`✅ Report ${i} sent — Reason: ${reasons[i%reasons.length]}`;
+      reportLog.appendChild(item);reportLog.scrollTop=reportLog.scrollHeight;
+      if(i===count){
+        progressText.textContent=`✅ All ${count} reports sent successfully!`;
+        const msg=`Hello WhatsApp Support, I want to report the number +${phone} for violating WhatsApp policies. Please review and take action.`;
+        const link=document.createElement('a');
+        link.href=`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;link.target='_blank';
+        link.className='btn-primary';link.style.cssText='margin-top:12px;width:100%;justify-content:center;';
+        link.textContent='📲 Open WhatsApp to complete';
+        reportLog.appendChild(link);
+        window.dgdevToast(`All ${count} reports sent! 🎉`);
+        running=false;reportBtn.disabled=false;
+      }
+    }
+  };
+})();
+</script>
+</body>
+</html>
