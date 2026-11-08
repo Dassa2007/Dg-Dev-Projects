@@ -186,10 +186,22 @@ h1 span { background: linear-gradient(90deg, #fff 5%, #ff687d 58%, #ff304b); bac
 .upload-zone p b { color: #ff7284; }
 
 #fileInput { display: none; }
-.file-list { display: grid; gap: 8px; margin-top: 13px; }
-.file-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: rgba(255,255,255,.03); border: 1px solid var(--line); padding: 10px 12px; border-radius: 11px; font-size: 12px; }
-.file-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.file-item small { color: var(--muted); white-space: nowrap; }
+
+/* =====================================
+   BEAUTIFUL FILE LIST
+===================================== */
+.file-list { display: grid; gap: 8px; margin-top: 15px; }
+.file-item { 
+  display: flex; align-items: center; justify-content: space-between; 
+  background: rgba(255,255,255,0.03); border: 1px solid var(--line); 
+  padding: 12px 16px; border-radius: 12px; font-size: 13px; 
+  transition: all 0.2s;
+}
+.file-item:hover { border-color: rgba(255, 48, 75, 0.4); background: rgba(255, 48, 75, 0.05); }
+.file-name-wrapper { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+.file-name-wrapper i { color: var(--red); font-size: 18px; }
+.file-name-wrapper span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #eee; font-weight: 500; }
+.file-size { color: var(--muted); font-size: 11px; white-space: nowrap; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; }
 
 .settings { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin-top: 23px; }
 .field label { display: block; color: #b8bdc9; font-size: 11px; font-weight: 700; margin: 0 0 8px; }
@@ -344,7 +356,14 @@ footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px;
 <div class="bg-grid"></div>
 
 <div class="wrap">
-  <section class="hero">
+  <!-- TOP BAR WITH SHARE BUTTON -->
+  <div style="display:flex; justify-content:flex-end; padding-top: 20px; animation: fadeUp .5s both;">
+    <button class="share-btn" id="shareOpen" style="border: 1px solid var(--line); background: rgba(255,255,255,0.05); color: white; padding: 11px 18px; border-radius: 11px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px; transition: .25s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--line)'">
+      <i class="fa-solid fa-share-nodes"></i> Share
+    </button>
+  </div>
+
+  <section class="hero" style="padding-top: 20px;">
     <div class="eyebrow"><i></i> SMART SUBTITLE TRANSLATOR</div>
     <h1>Translate subtitles<br><span>naturally.</span></h1>
     <p>Translate your movie, anime and series subtitles into your language while keeping the original timing and subtitle structure.</p>
@@ -402,8 +421,8 @@ footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px;
       </div>
     </div>
 
-    <!-- Style Settings -->
-    <div class="settings" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 13px;">
+    <!-- Style Settings & Download Format -->
+    <div class="settings" style="grid-template-columns: 1fr 1fr 1fr 1fr; margin-top: 13px;">
       <div class="field">
         <label for="fontName">FONT FAMILY</label>
         <select id="fontName">
@@ -420,7 +439,6 @@ footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px;
             <option value="Tahoma">Tahoma</option>
           </optgroup>
         </select>
-        <div class="hint">Font style for subtitles.</div>
       </div>
       <div class="field">
         <label for="fontSize">FONT SIZE</label>
@@ -435,12 +453,18 @@ footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px;
           <option value="32">32px</option>
           <option value="36">36px</option>
         </select>
-        <div class="hint">Size of the text.</div>
       </div>
       <div class="field">
         <label for="fontColor">FONT COLOR</label>
         <input type="color" id="fontColor" value="#ffffff" style="padding: 5px;">
-        <div class="hint">Color of the text.</div>
+      </div>
+      <div class="field">
+        <label for="downloadFormat">DOWNLOAD FORMAT</label>
+        <select id="downloadFormat">
+          <option value="zip">ZIP Archive (Multiple files)</option>
+          <option value="individual">Individual Files</option>
+        </select>
+        <div class="hint">How you want to download.</div>
       </div>
     </div>
 
@@ -471,7 +495,7 @@ footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px;
   <footer>POWERED BY <span class="footer-brand">DG-DEV PROJECTS</span> · SUBTITLES MADE SIMPLE</footer>
 </div>
 
-<!-- SHARE MODAL (New Design) -->
+<!-- SHARE MODAL -->
 <div class="modal-overlay" id="shareModal">
   <div class="share-modal">
     <button class="close-modal" id="closeModal" aria-label="Close">
@@ -502,7 +526,7 @@ footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px;
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 /* =====================================
-   REMOVE LOADER ON PAGE LOAD
+   UI & NAVIGATION
 ===================================== */
 window.addEventListener('load', function() {
   const loader = document.getElementById('dgdev-loader');
@@ -514,9 +538,6 @@ window.addEventListener('load', function() {
   }
 });
 
-/* =====================================
-   HAMBURGER MENU LOGIC
-===================================== */
 const menuToggle = document.getElementById('menuToggle');
 const sideMenu = document.getElementById('sideMenu');
 const navOverlay = document.getElementById('navOverlay');
@@ -560,7 +581,6 @@ let outputFiles = [];
 let busy = false;
 let toastTimer;
 
-/* TOAST */
 function showToast(message, error = false) {
   const toast = $('toast');
   toast.textContent = message;
@@ -572,7 +592,6 @@ function showToast(message, error = false) {
   }, 3000);
 }
 
-/* STATUS */
 function showStatus(message, error = false) {
   const el = $('status');
   el.textContent = message;
@@ -581,17 +600,22 @@ function showStatus(message, error = false) {
 }
 function hideStatus() { $('status').style.display = 'none'; }
 
-/* FILE LIST */
+/* NEW BEAUTIFUL FILE LIST UI */
 function updateFileList() {
   $('fileList').innerHTML = '';
   selectedFiles.forEach((f) => {
     const row = document.createElement('div');
     row.className = 'file-item';
-    const name = document.createElement('span');
-    name.innerHTML = '<i class="fa-solid fa-file-lines" style="color:var(--red);margin-right:8px;"></i>' + f.name;
+    
+    const nameWrap = document.createElement('div');
+    nameWrap.className = 'file-name-wrapper';
+    nameWrap.innerHTML = `<i class="fa-solid fa-file-lines"></i> <span>${f.name}</span>`;
+    
     const size = document.createElement('small');
+    size.className = 'file-size';
     size.textContent = (f.size / 1024).toFixed(1) + ' KB';
-    row.append(name, size);
+    
+    row.append(nameWrap, size);
     $('fileList').append(row);
   });
   $('translateBtn').disabled = !selectedFiles.length || busy;
@@ -634,7 +658,7 @@ dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dra
 dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
 dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); addFiles([...e.dataTransfer.files]); });
 
-/* ================= PARSERS & GENERATORS ================= */
+/* PARSERS & GENERATORS */
 function parseSrt(text) {
   const lines = text.replace(/\r\n/g, '\n').split('\n');
   const entries = [];
@@ -792,7 +816,6 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
   return result;
 }
 
-/* ================= WATERMARK ================= */
 function addEndWatermark(entries) {
   if (!entries || entries.length === 0) {
     return [{ start: "00:00:01,000", end: "00:00:05,000", text: "[ DG-DEV · Translated ]", isWatermark: true }];
@@ -817,7 +840,6 @@ function addEndWatermark(entries) {
   return copy;
 }
 
-/* ================= TRANSLATION ENGINE ================= */
 function isTranslatable(text) {
   const t = text.trim();
   if (!t) return false;
@@ -899,8 +921,6 @@ async function translateBatch(texts, source, target, retries = 2) {
       if (attempt < retries) await new Promise(r => setTimeout(r, 400 * Math.pow(2, attempt)));
     }
   }
-
-  // Fallback to single requests
   const fallback = [];
   for (const t of texts) fallback.push(await translateSingleLine(t, source, target));
   return fallback;
@@ -923,7 +943,6 @@ function chunkTexts(texts, maxChars, maxLines) {
   return batches;
 }
 
-/* ================= MAIN PROCESS ================= */
 async function processSubtitle(file, source, target, style, progressCb) {
   const ext = file.name.split('.').pop().toLowerCase();
   const text = await file.text();
@@ -936,7 +955,6 @@ async function processSubtitle(file, source, target, style, progressCb) {
 
   if (!entries.length) throw new Error(file.name + ': No valid subtitle cues found.');
 
-  // Collect unique translatable texts
   const uniqueTexts = new Set();
   entries.forEach(e => {
     if (isTranslatable(e.text)) uniqueTexts.add(e.text);
@@ -947,7 +965,7 @@ async function processSubtitle(file, source, target, style, progressCb) {
   if (textsToTranslate.length > 0) {
     const batches = chunkTexts(textsToTranslate, 1200, 15);
     let nextBatch = 0, completedBatches = 0;
-    const CONCURRENCY = 5; // Increased speed
+    const CONCURRENCY = 5;
 
     async function worker() {
       while (true) {
@@ -967,21 +985,17 @@ async function processSubtitle(file, source, target, style, progressCb) {
     await Promise.all(workers);
   }
 
-  // Apply translations
   entries.forEach(e => {
     if (!e.isWatermark) e.text = translations.get(e.text) || e.text;
   });
 
-  // Add watermark
   entries = addEndWatermark(entries);
 
-  // Generate output
   let output = '';
   if (ext === 'srt') output = generateSrt(entries, style);
   else if (ext === 'vtt') output = generateVtt(entries, style);
   else if (ext === 'ass' || ext === 'ssa') output = generateAss(entries, style);
 
-  // Return filename with DG-DEV prefix
   return { name: file.name.replace(/\.(srt|vtt|ass|ssa)$/i, '_DG-DEV.' + ext), content: output };
 }
 
@@ -1013,7 +1027,6 @@ function setProgress(done, total, label) {
   $('progressLabel').textContent = label;
 }
 
-/* ================= EVENT LISTENERS ================= */
 $('translateBtn').addEventListener('click', async () => {
   if (busy || !selectedFiles.length) return;
   busy = true;
@@ -1027,7 +1040,6 @@ $('translateBtn').addEventListener('click', async () => {
     const source = $('sourceLang').value, target = $('targetLang').value;
     if (source === target && source !== 'auto') throw new Error('Source and target languages are the same.');
 
-    // Get Style Settings
     const style = {
       font: $('fontName').value,
       size: $('fontSize').value,
@@ -1060,20 +1072,33 @@ $('translateBtn').addEventListener('click', async () => {
   }
 });
 
+/* UPDATED DOWNLOAD FUNCTION */
 $('downloadBtn').addEventListener('click', async () => {
   if (!outputFiles.length) return;
-  if (outputFiles.length === 1) {
-    const f = outputFiles[0], blob = new Blob([f.content], { type: 'text/plain;charset=utf-8' }), url = URL.createObjectURL(blob), a = document.createElement('a');
-    a.href = url;
-    a.download = f.name;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('File downloaded!');
+  
+  const format = $('downloadFormat').value;
+  
+  if (outputFiles.length === 1 || format === 'individual') {
+    // Download files individually
+    outputFiles.forEach((f, index) => {
+        setTimeout(() => {
+            const blob = new Blob([f.content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = f.name;
+            a.click();
+            URL.revokeObjectURL(url);
+        }, index * 300); // slight delay to prevent browser blocking
+    });
+    showToast('Individual files downloaded!');
   } else {
     if (typeof JSZip === 'undefined') { showStatus('ZIP library is unavailable. Reload and try again.', true); return; }
     const zip = new JSZip();
     outputFiles.forEach(f => zip.file(f.name.replace(/^.*[\\/]/, ''), f.content));
-    const blob = await zip.generateAsync({ type: 'blob' }), url = URL.createObjectURL(blob), a = document.createElement('a');
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
     a.href = url;
     a.download = 'DG-DEV-Translated-Subtitles.zip';
     a.click();
@@ -1083,38 +1108,32 @@ $('downloadBtn').addEventListener('click', async () => {
 });
 
 /* =====================================
-   PAGE SHARE MODAL (UPDATED LINK)
+   SHARE MODAL LOGIC
 ===================================== */
 const shareModal = $('shareModal');
 const shareUrlInput = $('shareUrl');
 const PAGE_SHARE_URL = "https://dg-dev-livid.vercel.app/subtitle-translator";
 
-function openShareModal() {
+$('shareOpen').addEventListener('click', () => {
   shareUrlInput.value = PAGE_SHARE_URL;
   shareModal.classList.add('show');
-}
+});
 
-function closeShareModal() {
-  shareModal.classList.remove('show');
-}
-
-$('shareBtn') ? $('shareBtn').addEventListener('click', openShareModal) : null;
-$('closeModal').addEventListener('click', closeShareModal);
+$('closeModal').addEventListener('click', () => shareModal.classList.remove('show'));
 
 shareModal.addEventListener('click', event => {
-  if (event.target === shareModal) closeShareModal();
+  if (event.target === shareModal) shareModal.classList.remove('show');
 });
 
 document.addEventListener('keydown', event => {
-  if (event.key === 'Escape') closeShareModal();
+  if (event.key === 'Escape') shareModal.classList.remove('show');
 });
 
-/* COPY PAGE LINK */
 $('copyBtn').addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(PAGE_SHARE_URL);
     showToast('Page link copied successfully!');
-    closeShareModal();
+    shareModal.classList.remove('show');
   } catch (err) {
     const temp = document.createElement('textarea');
     temp.value = PAGE_SHARE_URL;
@@ -1123,11 +1142,10 @@ $('copyBtn').addEventListener('click', async () => {
     document.execCommand('copy');
     temp.remove();
     showToast('Page link copied successfully!');
-    closeShareModal();
+    shareModal.classList.remove('show');
   }
 });
 
-/* NATIVE SHARE */
 $('nativeShare').addEventListener('click', async () => {
   const shareData = {
     title: "DG-DEV Subtitle Translator",
@@ -1147,13 +1165,12 @@ $('nativeShare').addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(PAGE_SHARE_URL);
       showToast("Page link copied successfully!");
-      closeShareModal();
+      shareModal.classList.remove('show');
     } catch (err) {
       showToast("Sharing is not supported on this browser.", true);
     }
   }
 });
-
 </script>
 </body>
 </html>
