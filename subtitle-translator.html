@@ -188,28 +188,100 @@ h1 span { background: linear-gradient(90deg, #fff 5%, #ff687d 58%, #ff304b); bac
 #fileInput { display: none; }
 
 /* =====================================
-   BEAUTIFUL FILE LIST
+   UPDATED BEAUTIFUL FILE LIST
 ===================================== */
 .file-list { display: grid; gap: 8px; margin-top: 15px; }
 .file-item { 
   display: flex; align-items: center; justify-content: space-between; 
   background: rgba(255,255,255,0.03); border: 1px solid var(--line); 
-  padding: 12px 16px; border-radius: 12px; font-size: 13px; 
+  padding: 12px 16px; border-radius: 12px; 
   transition: all 0.2s;
+  gap: 10px;
 }
 .file-item:hover { border-color: rgba(255, 48, 75, 0.4); background: rgba(255, 48, 75, 0.05); }
-.file-name-wrapper { display: flex; align-items: center; gap: 12px; overflow: hidden; }
-.file-name-wrapper i { color: var(--red); font-size: 18px; }
-.file-name-wrapper span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #eee; font-weight: 500; }
-.file-size { color: var(--muted); font-size: 11px; white-space: nowrap; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; }
+.file-name-wrapper { 
+  display: flex; align-items: center; gap: 12px; 
+  overflow: hidden; /* Prevents overflow */
+  flex: 1; 
+  min-width: 0; /* Crucial for flex text truncation */
+}
+.file-name-wrapper i { color: var(--red); font-size: 18px; flex-shrink: 0; }
+.file-name-wrapper span { 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; /* Adds ... to long names */
+  color: #eee; 
+  font-weight: 500; 
+  font-size: 13px;
+}
+.file-size { 
+  color: var(--muted); 
+  font-size: 11px; 
+  white-space: nowrap; 
+  background: rgba(0,0,0,0.3); 
+  padding: 4px 8px; 
+  border-radius: 6px; 
+  flex-shrink: 0; /* Prevents size from shrinking */
+}
 
-.settings { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin-top: 23px; }
-.field label { display: block; color: #b8bdc9; font-size: 11px; font-weight: 700; margin: 0 0 8px; }
-.field select, .field input { width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 12px; background: #0c0e14; color: var(--text); padding: 0 13px; font: 500 13px 'Inter', sans-serif; outline: none; }
-.field select:focus, .field input:focus { border-color: #ff304b; box-shadow: 0 0 0 3px rgba(255, 48, 75, 0.1); }
-.hint { font-size: 10px; color: var(--muted); line-height: 1.6; margin-top: 7px; }
+/* =====================================
+   UPDATED SETTINGS DESIGN
+===================================== */
+.settings-grid {
+  display: grid;
+  /* Auto responsive grid: 1 column on mobile, 2 on tablet, 4 on desktop */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
 
-.action-row { display: flex; gap: 10px; margin-top: 21px; }
+.field {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 14px;
+  transition: all 0.3s ease;
+}
+
+.field:hover, .field:focus-within {
+  border-color: rgba(255, 48, 75, 0.3);
+  background: rgba(255, 48, 75, 0.03);
+}
+
+.field label { 
+  display: flex; 
+  align-items: center;
+  gap: 8px;
+  color: #b8bdc9; 
+  font-size: 11px; 
+  font-weight: 700; 
+  margin: 0 0 10px; 
+  letter-spacing: 0.5px;
+}
+.field label i { color: var(--red); font-size: 12px; }
+
+.field select, .field input { 
+  width: 100%; 
+  height: 42px; 
+  border: 1px solid var(--line); 
+  border-radius: 10px; 
+  background: #0c0e14; 
+  color: var(--text); 
+  padding: 0 12px; 
+  font: 500 13px 'Inter', sans-serif; 
+  outline: none; 
+  transition: border 0.2s;
+}
+.field select:focus, .field input:focus { 
+  border-color: #ff304b; 
+  box-shadow: 0 0 0 3px rgba(255, 48, 75, 0.15); 
+}
+.field input[type="color"] {
+  padding: 4px;
+  cursor: pointer;
+}
+
+.action-row { display: flex; gap: 10px; margin-top: 25px; }
 .primary {
   flex: 1; min-height: 49px; border: 0; border-radius: 13px; color: white;
   background: linear-gradient(100deg, #ff4059, #bd092c); font: 800 13px 'Inter', sans-serif;
@@ -292,7 +364,7 @@ footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px;
   .hero p { font-size: 12px; }
   .main-card { border-radius: 18px; padding: 15px; }
   .upload-zone { min-height: 170px; }
-  .settings { grid-template-columns: 1fr; gap: 12px; }
+  /* Settings will automatically stack into 1 column on mobile because of auto-fit */
   .action-row { flex-direction: column; }
   .secondary { width: 100%; }
   .info-grid { grid-template-columns: 1fr; gap: 9px; margin-bottom: 35px; }
@@ -314,7 +386,7 @@ footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px;
   <div class="loader-brand">DG-DEV LOADING</div>
 </div>
 
-<!-- HEADER (From Home Page) -->
+<!-- HEADER -->
 <header class="header">
   <div class="header-inner">
     <a href="index.html" class="logo">
@@ -380,9 +452,9 @@ footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px;
     <div class="file-list" id="fileList"></div>
 
     <!-- Language Settings -->
-    <div class="settings">
+    <div class="settings-grid">
       <div class="field">
-        <label for="sourceLang">SOURCE LANGUAGE</label>
+        <label for="sourceLang"><i class="fa-solid fa-globe"></i> SOURCE LANGUAGE</label>
         <select id="sourceLang">
           <option value="auto">Auto detect</option>
           <option value="en">English</option>
@@ -393,10 +465,9 @@ footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px;
           <option value="ta">Tamil</option>
           <option value="hi">Hindi</option>
         </select>
-        <div class="hint">Auto detect works well for most subtitle files.</div>
       </div>
       <div class="field">
-        <label for="targetLang">TRANSLATE INTO</label>
+        <label for="targetLang"><i class="fa-solid fa-language"></i> TRANSLATE INTO</label>
         <select id="targetLang">
           <option value="si">Sinhala (සිංහල)</option>
           <option value="en">English</option>
@@ -417,14 +488,13 @@ footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px;
           <option value="id">Indonesian</option>
           <option value="tr">Turkish</option>
         </select>
-        <div class="hint">Choose the language you want your subtitles in.</div>
       </div>
     </div>
 
-    <!-- Style Settings & Download Format -->
-    <div class="settings" style="grid-template-columns: 1fr 1fr 1fr 1fr; margin-top: 13px;">
+    <!-- Style & Download Settings -->
+    <div class="settings-grid" style="margin-top: 14px;">
       <div class="field">
-        <label for="fontName">FONT FAMILY</label>
+        <label for="fontName"><i class="fa-solid fa-font"></i> FONT FAMILY</label>
         <select id="fontName">
           <optgroup label="Sinhala Fonts">
             <option value="Noto Sans Sinhala">Noto Sans Sinhala</option>
@@ -441,7 +511,7 @@ footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px;
         </select>
       </div>
       <div class="field">
-        <label for="fontSize">FONT SIZE</label>
+        <label for="fontSize"><i class="fa-solid fa-text-height"></i> FONT SIZE</label>
         <select id="fontSize">
           <option value="14">14px</option>
           <option value="16">16px</option>
@@ -455,16 +525,15 @@ footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px;
         </select>
       </div>
       <div class="field">
-        <label for="fontColor">FONT COLOR</label>
-        <input type="color" id="fontColor" value="#ffffff" style="padding: 5px;">
+        <label for="fontColor"><i class="fa-solid fa-palette"></i> FONT COLOR</label>
+        <input type="color" id="fontColor" value="#ffffff">
       </div>
       <div class="field">
-        <label for="downloadFormat">DOWNLOAD FORMAT</label>
+        <label for="downloadFormat"><i class="fa-solid fa-download"></i> DOWNLOAD FORMAT</label>
         <select id="downloadFormat">
           <option value="zip">ZIP Archive (Multiple files)</option>
           <option value="individual">Individual Files</option>
         </select>
-        <div class="hint">How you want to download.</div>
       </div>
     </div>
 
@@ -600,7 +669,6 @@ function showStatus(message, error = false) {
 }
 function hideStatus() { $('status').style.display = 'none'; }
 
-/* NEW BEAUTIFUL FILE LIST UI */
 function updateFileList() {
   $('fileList').innerHTML = '';
   selectedFiles.forEach((f) => {
@@ -609,7 +677,7 @@ function updateFileList() {
     
     const nameWrap = document.createElement('div');
     nameWrap.className = 'file-name-wrapper';
-    nameWrap.innerHTML = `<i class="fa-solid fa-file-lines"></i> <span>${f.name}</span>`;
+    nameWrap.innerHTML = `<i class="fa-solid fa-file-lines"></i> <span title="${f.name}">${f.name}</span>`;
     
     const size = document.createElement('small');
     size.className = 'file-size';
@@ -1072,14 +1140,12 @@ $('translateBtn').addEventListener('click', async () => {
   }
 });
 
-/* UPDATED DOWNLOAD FUNCTION */
 $('downloadBtn').addEventListener('click', async () => {
   if (!outputFiles.length) return;
   
   const format = $('downloadFormat').value;
   
   if (outputFiles.length === 1 || format === 'individual') {
-    // Download files individually
     outputFiles.forEach((f, index) => {
         setTimeout(() => {
             const blob = new Blob([f.content], { type: 'text/plain;charset=utf-8' });
@@ -1089,9 +1155,9 @@ $('downloadBtn').addEventListener('click', async () => {
             a.download = f.name;
             a.click();
             URL.revokeObjectURL(url);
-        }, index * 300); // slight delay to prevent browser blocking
+        }, index * 300);
     });
-    showToast('Individual files downloaded!');
+    showToast('Files downloaded!');
   } else {
     if (typeof JSZip === 'undefined') { showStatus('ZIP library is unavailable. Reload and try again.', true); return; }
     const zip = new JSZip();
