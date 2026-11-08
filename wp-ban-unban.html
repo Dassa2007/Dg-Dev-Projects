@@ -1,72 +1,670 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080808">
 <title>WP Ban & Unban - DG-DEV PROJECTS</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<script>(function(){const t=localStorage.getItem('dgdev-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
 <style>
-.mode-tabs{display:flex;gap:10px;margin-bottom:20px}
-.mode-tab{flex:1;padding:14px;background:var(--card);border:2px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;font-weight:700;transition:all .2s}
-.mode-tab.active{background:var(--accent-grad);color:#fff;border-color:transparent}
-.codes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:16px}
-.code-btn{padding:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-weight:600;font-size:.85rem;transition:all .2s;position:relative;overflow:hidden;font-family:inherit;color:var(--text)}
-.code-btn::after{content:'DG-DEV';position:absolute;top:4px;right:6px;font-size:.55rem;font-weight:800;background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;opacity:.6}
-.code-btn:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:var(--shadow)}
-.code-btn.ban:hover{border-color:var(--danger)}
-.code-btn.unban:hover{border-color:var(--success)}
+:root {
+  --bg: #080808;
+  --panel: #111319;
+  --panel2: #171a22;
+  --line: #292d38;
+  --text: #f5f6fa;
+  --muted: #969baa;
+  --red: #ff304b;
+  --red2: #c90d2d;
+  --white: #fff;
+  --green: #42d392;
+  --shadow: 0 22px 70px rgba(0,0,0,0.5);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: 'Inter', 'Noto Sans Sinhala', sans-serif;
+  background: var(--bg);
+  overflow-x: hidden;
+}
+
+button, input, textarea { font-family: inherit; }
+
+/* =====================================
+   HEADER & NAVIGATION
+===================================== */
+.header {
+  width: 100%; height: 75px; position: sticky; top: 0; z-index: 1000;
+  background: rgba(5,5,5,.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.header-inner {
+  max-width: 1250px; height: 100%; margin: auto; padding: 0 22px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  display: flex; align-items: center; gap: 12px; font-family: 'Space Grotesk', sans-serif;
+  font-size: 21px; font-weight: 800; letter-spacing: 1px; text-decoration: none; color: white;
+}
+.logo span { color: var(--red); }
+.logo-icon {
+  width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px;
+  color: white; background: linear-gradient(145deg, #ff1744, #760015); box-shadow: 0 0 20px rgba(255,23,68,.35);
+}
+.menu-toggle {
+  width: 46px; height: 46px; border-radius: 13px; border: 1px solid rgba(255,23,68,.5);
+  background: rgba(255,23,68,.08); display: flex; flex-direction: column; justify-content: center;
+  align-items: center; gap: 6px; transition: .3s; z-index: 1002;
+}
+.menu-toggle:hover { background: var(--red); box-shadow: 0 0 20px rgba(255,23,68,.5); }
+.menu-toggle span { width: 21px; height: 2px; background: white; border-radius: 5px; transition: .3s; }
+.menu-toggle.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.menu-toggle.active span:nth-child(2) { opacity: 0; transform: translateX(-10px); }
+.menu-toggle.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+.nav-overlay {
+  position: fixed; inset: 0; z-index: 998; background: rgba(0,0,0,.7);
+  opacity: 0; visibility: hidden; transition: .3s;
+}
+.nav-overlay.active { opacity: 1; visibility: visible; }
+.side-menu {
+  position: fixed; z-index: 1001; top: 0; right: -360px; width: 320px; max-width: 85%;
+  height: 100vh; padding: 100px 22px 30px; background: rgba(10,10,10,.97);
+  backdrop-filter: blur(20px); border-left: 1px solid rgba(255,23,68,.25);
+  transition: .4s cubic-bezier(.77,0,.18,1); overflow-y: auto;
+}
+.side-menu.active { right: 0; }
+.menu-heading { color: var(--red); font-family: 'Space Grotesk', sans-serif; font-size: 12px; letter-spacing: 3px; margin-bottom: 20px; }
+.menu-link {
+  display: flex; align-items: center; gap: 15px; padding: 15px; margin-bottom: 9px;
+  background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px; color: #ddd; font-size: 14px; transition: .3s; text-decoration: none;
+}
+.menu-link i { width: 22px; text-align: center; color: var(--red); font-size: 16px; }
+.menu-link:hover { background: rgba(255,23,68,.12); border-color: var(--red); transform: translateX(-5px); color: white; }
+.menu-link.active { background: rgba(255,23,68,.15); border-color: var(--red); color: #fff; }
+.menu-label { padding: 18px 5px 8px; color: #ff536f; font-family: 'Space Grotesk', sans-serif; font-size: 11px; letter-spacing: 2px; }
+
+/* =====================================
+   NEW RED NEON LOADER
+===================================== */
+.dgdev-loader-overlay {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 25px; z-index: 99999;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.dgdev-loader-overlay.hidden { opacity: 0; visibility: hidden; }
+.loader-wrapper { position: relative; width: 100px; height: 100px; }
+.loader-wrapper .inner {
+  position: absolute; box-sizing: border-box; width: 100%; height: 100%;
+  border-radius: 50%; border: 4px solid transparent;
+}
+.loader-wrapper .inner.one { border-top-color: #ff1744; border-right-color: #ff1744; animation: rotate-one 1s linear infinite; }
+.loader-wrapper .inner.two { border-bottom-color: #ff003c; border-left-color: #ff003c; animation: rotate-two 1s linear infinite; }
+.loader-wrapper .inner.three { border-top-color: #ff526d; border-right-color: #ff526d; animation: rotate-three 1s linear infinite; }
+@keyframes rotate-one { 0% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg); } 100% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg); } }
+@keyframes rotate-two { 0% { transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg); } 100% { transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg); } }
+@keyframes rotate-three { 0% { transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg); } 100% { transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg); } }
+.loader-brand {
+  font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 3px;
+  color: var(--red); animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+/* =====================================
+   BACKGROUND & LAYOUT
+===================================== */
+.animated-bg {
+  position: fixed; inset: 0; z-index: -2; overflow: hidden;
+  background: radial-gradient(ellipse at 15% 15%, rgba(255,0,0,.13), transparent 40%),
+              radial-gradient(ellipse at 85% 80%, rgba(180,0,0,.12), transparent 40%), #080808;
+}
+.animated-bg::before {
+  content: ""; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 45px 45px; mask-image: linear-gradient(to bottom, black, transparent);
+}
+
+.wrap { width: min(100% - 32px, 850px); margin: auto; padding: 30px 0 60px; }
+
+/* TOP BAR WITH SHARE BUTTON */
+.top-actions { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+.share-btn {
+  border: 1px solid var(--line); background: rgba(255,255,255,0.05); color: white;
+  padding: 11px 18px; border-radius: 11px; cursor: pointer; font-weight: 700;
+  display: flex; align-items: center; gap: 8px; transition: .25s;
+}
+.share-btn:hover { border-color: var(--red); background: rgba(255,48,75,.1); }
+
+/* HERO */
+.hero { text-align: center; margin-bottom: 30px; animation: fadeUp .8s ease both; }
+.hero-icon {
+  width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 22px;
+  background: linear-gradient(145deg, #252525, #101010); border: 1px solid #383838;
+  display: grid; place-items: center; font-size: 35px; color: var(--red);
+  box-shadow: 0 0 45px rgba(255,0,0,.13); animation: pulse 3s infinite;
+}
+@keyframes pulse { 50% { box-shadow: 0 0 50px rgba(255,0,0,.3); } }
+h1 { font-size: clamp(26px, 6vw, 42px); font-weight: 900; letter-spacing: -1.5px; }
+h1 span { background: linear-gradient(135deg, #ff3939, #b90000); -webkit-background-clip: text; color: transparent; }
+.hero p { color: var(--muted); max-width: 520px; margin: 13px auto 0; font-size: 13px; line-height: 1.8; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* MAIN CARD */
+.card {
+  background: linear-gradient(145deg, #151515, #0d0d0d);
+  border: 1px solid var(--line); border-radius: 19px; padding: 24px;
+  margin-bottom: 20px; box-shadow: var(--shadow); animation: fadeUp .7s ease both;
+}
+.card-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;}
+.card-title i { color: var(--red); }
+.card-desc { color: var(--muted); font-size: 12px; line-height: 1.7; margin-bottom: 20px; }
+
+.label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 9px; color: #ddd; }
+.input {
+  width: 100%; padding: 15px; background: #090909; color: white;
+  border: 1px solid #333; border-radius: 11px; outline: none; transition: .25s; font-size: 15px;
+}
+.input:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(255,0,0,.1); }
+.form-group { margin-bottom: 17px; }
+
+.btn {
+  width: 100%; padding: 15px; border: 0; border-radius: 11px;
+  background: linear-gradient(135deg, #ff3939, #b90000); color: white;
+  font-weight: 800; font-size: 14px; transition: .25s;
+  box-shadow: 0 7px 25px rgba(255,0,0,.15); display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,0,0,.3); }
+
+/* TABS */
+.mode-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+.mode-tab {
+  flex: 1; padding: 14px; background: #151515; border: 2px solid var(--line);
+  border-radius: 12px; cursor: pointer; text-align: center; font-weight: 800; font-size: 14px; transition: all .2s;
+}
+.mode-tab.active.ban { background: rgba(255,48,75,.15); border-color: var(--red); color: #ff526d; }
+.mode-tab.active.unban { background: rgba(34,197,94,.15); border-color: var(--green); color: var(--green); }
+
+/* CODES GRID */
+.codes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
+.code-btn {
+  padding: 14px 10px; background: #151515; border: 1px solid var(--line);
+  border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 12px;
+  transition: all .2s; color: #ddd; text-align: left; display: flex; flex-direction: column; gap: 5px;
+}
+.code-btn:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+.code-btn.ban:hover { border-color: var(--red); box-shadow: 0 0 15px rgba(255,48,75,.2); }
+.code-btn.unban:hover { border-color: var(--green); box-shadow: 0 0 15px rgba(34,197,94,.2); }
+.code-title { font-weight: 800; font-size: 11px; letter-spacing: 0.5px; margin-bottom: 4px; }
+.code-btn.ban .code-title { color: #ff526d; }
+.code-btn.unban .code-title { color: var(--green); }
+.code-desc { font-size: 10px; color: var(--muted); line-height: 1.4; }
+
+.info {
+  padding: 14px; background: rgba(255,40,40,.07); border: 1px solid rgba(255,40,40,.2);
+  border-radius: 11px; color: #ddd; font-size: 11px; line-height: 1.8; margin-top: 20px;
+}
+.info strong { color: #ff5555; }
+
+/* =====================================
+   SHARE MODAL
+===================================== */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 2000; display: none; align-items: center;
+  justify-content: center; padding: 20px; background: rgba(0,0,0,.78); backdrop-filter: blur(9px);
+}
+.modal-overlay.show { display: flex; animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.share-modal {
+  width: 100%; max-width: 390px; padding: 25px; border-radius: 20px;
+  background: linear-gradient(145deg, #1b1b1b, #0d0d0d);
+  border: 1px solid rgba(255,50,50,.35);
+  box-shadow: 0 20px 80px rgba(0,0,0,.65), 0 0 35px rgba(255,0,0,.08);
+  position: relative; animation: modalUp .3s ease;
+}
+@keyframes modalUp { from { opacity: 0; transform: translateY(20px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.close-modal {
+  position: absolute; right: 15px; top: 15px; width: 33px; height: 33px;
+  border-radius: 9px; border: 1px solid var(--line); background: #222; color: white; cursor: pointer;
+}
+.share-modal-icon {
+  width: 57px; height: 57px; border-radius: 17px; display: grid; place-items: center;
+  background: rgba(255,35,35,.14); color: var(--red); font-size: 24px; margin-bottom: 17px;
+}
+.share-modal h2 { font-family: 'Space Grotesk', sans-serif; font-size: 21px; margin-bottom: 8px; }
+.share-modal p { color: var(--muted); font-size: 12px; line-height: 1.7; margin-bottom: 18px; }
+.share-link-box { display: flex; gap: 7px; padding: 7px; border-radius: 11px; background: #080808; border: 1px solid var(--line); }
+.share-link-box input { width: 100%; min-width: 0; border: none; outline: none; background: transparent; color: #eeeeee; padding: 7px; font-size: 11px; }
+.share-copy { flex-shrink: 0; border: none; border-radius: 8px; padding: 10px 12px; background: var(--red); color: white; font-size: 11px; font-weight: 700; cursor: pointer; }
+.modal-share-btn { width: 100%; margin-top: 12px; border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: #202020; color: white; font-size: 12px; font-weight: 700; cursor: pointer; }
+.modal-share-btn:hover { border-color: var(--red); }
+
+/* TOAST */
+.toast {
+  position: fixed; z-index: 3000; left: 50%; bottom: 25px; transform: translate(-50%, 20px);
+  opacity: 0; pointer-events: none; padding: 12px 18px; border-radius: 11px;
+  background: #202020; border: 1px solid rgba(255,255,255,.12); color: white;
+  font-size: 12px; font-weight: 600; text-align: center; box-shadow: 0 10px 35px rgba(0,0,0,.5);
+  transition: .25s; max-width: calc(100% - 30px);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+.footer { text-align: center; padding-top: 30px; color: #666; font-size: 10px; line-height: 2; }
+.footer strong { color: #ddd; letter-spacing: 1px; }
+
+@media(max-width: 500px) {
+  .wrap { width: calc(100% - 24px); padding-top: 18px; }
+  .card { padding: 19px; }
+  .codes-grid { grid-template-columns: 1fr; }
+  .hero { margin-bottom: 25px; }
+}
 </style>
 </head>
+
 <body>
-<main class="page-container">
-  <h1 class="page-title">WP Ban & Unban 🚫</h1>
-  <p class="page-subtitle">Enter a WhatsApp number, verify, choose mode, then tap a code to send the report.</p>
-  <div class="card" style="margin-bottom:24px">
+
+<!-- NEW RED NEON LOADER -->
+<div class="dgdev-loader-overlay" id="dgdev-loader">
+  <div class="loader-wrapper">
+    <div class="inner one"></div>
+    <div class="inner two"></div>
+    <div class="inner three"></div>
+  </div>
+  <div class="loader-brand">DG-DEV LOADING</div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon"><i class="fa-solid fa-code"></i></div>
+      DG-<span>DEV</span>
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- MENU OVERLAY -->
+<div class="nav-overlay" id="navOverlay"></div>
+
+<!-- SIDE MENU -->
+<nav class="side-menu" id="sideMenu">
+  <div class="menu-heading">DG-DEV NAVIGATION</div>
+  <a href="index.html" class="menu-link"><i class="fa-solid fa-house"></i> Home</a>
+  <a href="profile.html" class="menu-link"><i class="fa-solid fa-user"></i> Profile</a>
+  
+  <div class="menu-label">PREMIUM TOOLS</div>
+  <a href="image-cut.html" class="menu-link"><i class="fa-solid fa-object-group"></i> Image Cut</a>
+  <a href="img-url-generator.html" class="menu-link"><i class="fa-solid fa-link"></i> Img URL Generator</a>
+  <a href="av-url-generator.html" class="menu-link"><i class="fa-solid fa-clapperboard"></i> Audio & Video Gen</a>
+  <a href="subtitle-translator.html" class="menu-link"><i class="fa-solid fa-language"></i> Subtitles Translator</a>
+  <a href="subtitle-converter.html" class="menu-link"><i class="fa-solid fa-arrows-rotate"></i> Sub Converter</a>
+  <a href="modz-downloader.html" class="menu-link"><i class="fa-solid fa-cloud-arrow-down"></i> Modz Downloader</a>
+  <a href="social-downloader.html" class="menu-link"><i class="fa-solid fa-photo-film"></i> Social Downloader</a>
+  <a href="wp-ban-unban.html" class="menu-link active"><i class="fa-solid fa-shield-halved"></i> WP Ban & Unban</a>
+  <a href="whatsapp-report.html" class="menu-link"><i class="fa-brands fa-whatsapp"></i> WhatsApp Report</a>
+  <a href="text-generator.html" class="menu-link"><i class="fa-solid fa-wand-magic-sparkles"></i> Text Generator</a>
+  <a href="1xbet-signals.html" class="menu-link"><i class="fa-solid fa-chart-line"></i> 1x Bet Signals</a>
+  <a href="crypto-course.html" class="menu-link"><i class="fa-brands fa-bitcoin"></i> Crypto Course</a>
+  <a href="about.html" class="menu-link"><i class="fa-solid fa-circle-info"></i> About</a>
+</nav>
+
+<div class="animated-bg"></div>
+
+<div class="wrap">
+
+  <div class="top-actions">
+    <button class="share-btn" id="shareOpen">
+      <i class="fa-solid fa-share-nodes"></i> Share
+    </button>
+  </div>
+
+  <section class="hero">
+    <div class="hero-icon"><i class="fa-solid fa-shield-halved"></i></div>
+    <h1>WP BAN & <span>UNBAN</span></h1>
+    <p>Verify your WhatsApp number to generate official support email templates for banning or unbanning accounts.</p>
+  </section>
+
+  <section class="card" id="verifyCard">
+    <h2 class="card-title"><i class="fa-solid fa-user-shield"></i> Verify Number</h2>
+    <p class="card-desc">Enter the target WhatsApp number including the country code.</p>
+
     <div class="form-group">
-      <label class="form-label">Enter WhatsApp Number</label>
-      <input type="tel" class="form-input" id="numberInput" placeholder="+94771234567">
+      <label class="label" for="phone">WhatsApp Number</label>
+      <input class="input" id="phone" type="tel" placeholder="+94771234567" autocomplete="tel">
     </div>
-    <button class="btn-primary" id="verifyBtn">✅ Verify Number</button>
-  </div>
-  <div class="card" id="mainCard" style="display:none">
+
+    <button class="btn" id="verifyBtn">
+      <i class="fa-solid fa-circle-check"></i> VERIFY NUMBER
+    </button>
+    
+    <div class="info">
+      <strong>Note:</strong> This tool generates email templates. You must send the email through your own Gmail/Email app. We do not automatically ban or unban numbers.
+    </div>
+  </section>
+
+  <section class="card" id="codesCard" style="display:none;">
+    <h2 class="card-title"><i class="fa-solid fa-envelope"></i> Select Action</h2>
+    <p class="card-desc">Tap any code below to open your email app with a pre-filled report message containing the number.</p>
+
     <div class="mode-tabs">
-      <div class="mode-tab active" data-mode="ban">🚫 Ban Number</div>
-      <div class="mode-tab" data-mode="unban">✅ Unban Number</div>
+      <div class="mode-tab active ban" data-mode="ban">🚫 Ban Codes (20)</div>
+      <div class="mode-tab" data-mode="unban">✅ Unban Codes (20)</div>
     </div>
-    <p style="font-size:.9rem;color:var(--text-muted);margin-bottom:8px">Tap any code below to send a report/unban request via WhatsApp.</p>
+
     <div class="codes-grid" id="codesGrid"></div>
+  </section>
+
+  <footer class="footer">
+    <strong>DG-DEV PROJECTS</strong><br>
+    Independent community tool. Not affiliated with WhatsApp or Meta.<br>
+    © 2026 DG-DEV PROJECTS. All Rights Reserved.
+  </footer>
+
+</div>
+
+<!-- SHARE MODAL -->
+<div class="modal-overlay" id="shareModal">
+  <div class="share-modal">
+    <button class="close-modal" id="closeModal" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div class="share-modal-icon">
+      <i class="fa-solid fa-share-nodes"></i>
+    </div>
+    <h2>Share This Tool</h2>
+    <p>Share the DG-DEV WP Ban & Unban tool with your friends. Copy the page link below.</p>
+    
+    <div class="share-link-box">
+      <input type="text" id="shareUrl" readonly>
+      <button class="share-copy" id="copyBtn">
+        <i class="fa-regular fa-copy"></i> Copy
+      </button>
+    </div>
+    
+    <button class="modal-share-btn" id="nativeShare">
+      <i class="fa-solid fa-arrow-up-from-bracket"></i> Share with other apps
+    </button>
   </div>
-</main>
-<script src="main.js"></script>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
-(function(){
-  const BAN=["Hello WhatsApp Support, this number is sending spam messages. Please ban it. Number: {NUM}","Reporting {NUM} - this account is using abusive language. Please take action.","{NUM} is a fake account impersonating me. Please ban this number immediately.","Urgent: {NUM} is threatening and harassing me. Please ban.","{NUM} is running a scam on WhatsApp. Kindly ban this account.","This number {NUM} is involved in illegal activities. Please review and ban.","{NUM} is sending fraudulent links. Please ban this number.","I want to report {NUM} for sending inappropriate content. Ban please.","{NUM} is impersonating a business page. Please ban it.","Reporting {NUM} - they stole money from me via WhatsApp scam.","{NUM} is using stolen photos to scam people. Ban this account.","{NUM} keeps creating new accounts to harass me. Please ban permanently.","This number {NUM} is asking for OTPs - clearly a fraudster. Ban it.","{NUM} is sending explicit content. Please ban immediately.","Reporting {NUM} - the user tried to hack my WhatsApp. Please ban.","{NUM} is a bot sending hundreds of messages per minute. Ban please.","{NUM} posted my private info in a group. Please ban for privacy violation.","{NUM} is a hacked account spreading malware. Please ban.","Reporting {NUM} for repeated phishing attempts. Ban it.","{NUM} is using my name to scam my contacts. Please ban this account."];
-  const UNBAN=["Hi WhatsApp Support, my number {NUM} was banned by mistake. Please unban.","My number {NUM} is banned but I didn't violate any rules. Kindly restore access.","{NUM} - I'm a legitimate user. Please unban my WhatsApp account.","Hi Support, {NUM} was banned unfairly. I use it for business. Please unban.","This is my primary contact number {NUM}. Please unban and restore my chats.","I didn't do anything wrong with {NUM}. Please lift the ban.","Please unban {NUM} - I run a small business on this number.","I've been a WhatsApp user for years. My number {NUM} was wrongly banned. Please unban.","Hi, my number {NUM} is banned due to an automated mistake. Please restore.","{NUM} - I need my WhatsApp back for family contact. Please unban.","The ban on {NUM} was a misunderstanding. Please review and unban.","Please reconsider - {NUM} is used for important work. Restore access.","My {NUM} got banned after someone reported me falsely. Please unban.","Requesting unban of {NUM} - I have never spammed anyone.","{NUM} is my only WhatsApp number. Please unban kindly.","Unban request for {NUM}. I have important messages I can't access.","Please restore {NUM} - I need it for family and work communication.","My {NUM} was banned for no valid reason. Please reinstate.","{NUM} - I'm a genuine user, not a spammer. Please unban.","Kindly unban {NUM}. I'll follow all WhatsApp policies strictly."];
-  const numberInput=document.getElementById('numberInput'),verifyBtn=document.getElementById('verifyBtn'),mainCard=document.getElementById('mainCard'),codesGrid=document.getElementById('codesGrid');
-  let phone='',currentMode='ban';
-  verifyBtn.onclick=()=>{
-    const val=numberInput.value.trim().replace(/[^\d+]/g,'');
-    if(val.length<8){window.dgdevToast('Please enter a valid number','error');return}
-    phone=val.replace(/^\+/,'');
-    verifyBtn.textContent='✅ Verified: +'+phone;verifyBtn.disabled=true;numberInput.disabled=true;
-    mainCard.style.display='block';renderCodes();window.dgdevToast('Number verified ✅');
-  };
-  document.querySelectorAll('.mode-tab').forEach(t=>t.onclick=()=>{
-    document.querySelectorAll('.mode-tab').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');currentMode=t.dataset.mode;renderCodes();
-  });
-  function renderCodes(){
-    const templates=currentMode==='ban'?BAN:UNBAN;
-    codesGrid.innerHTML=templates.map((_,i)=>`<button class="code-btn ${currentMode}" data-idx="${i}">${currentMode==='ban'?'🚫':'✅'} Code ${i+1}</button>`).join('');
-    codesGrid.querySelectorAll('.code-btn').forEach(btn=>btn.onclick=()=>{
-      const idx=+btn.dataset.idx;
-      const msg=templates[idx].replace('{NUM}','+'+phone);
-      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
-      window.dgdevToast(`Opening WhatsApp with code ${idx+1}...`);
-    });
+/* =====================================
+   UI & NAVIGATION
+===================================== */
+window.addEventListener('load', function() {
+  const loader = document.getElementById('dgdev-loader');
+  if (loader) {
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      setTimeout(() => loader.remove(), 500);
+    }, 600);
   }
-})();
+});
+
+const menuToggle = document.getElementById('menuToggle');
+const sideMenu = document.getElementById('sideMenu');
+const navOverlay = document.getElementById('navOverlay');
+
+function toggleMenu() {
+  const isOpen = sideMenu.classList.toggle('active');
+  menuToggle.classList.toggle('active', isOpen);
+  navOverlay.classList.toggle('active', isOpen);
+  menuToggle.setAttribute('aria-expanded', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+
+menuToggle.addEventListener('click', toggleMenu);
+navOverlay.addEventListener('click', toggleMenu);
+
+document.querySelectorAll('.menu-link').forEach(link => {
+  link.addEventListener('click', () => {
+    sideMenu.classList.remove('active');
+    menuToggle.classList.remove('active');
+    navOverlay.classList.remove('active');
+    menuToggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') {
+    sideMenu.classList.remove('active');
+    menuToggle.classList.remove('active');
+    navOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+});
+
+/* =====================================
+   BAN & UNBAN LOGIC
+===================================== */
+const $ = id => document.getElementById(id);
+let currentPhone = "";
+let currentMode = "ban";
+let toastTimer;
+
+function showToast(message, error = false) {
+  const toast = $('toast');
+  toast.textContent = message;
+  toast.style.borderLeft = error ? '4px solid #ef4444' : '4px solid #22c55e';
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+// 20 Ban Templates (Subject & Body)
+const banCodes = [
+  { title: "Code 01", sub: "Spam Messages", body: "This account is sending massive amounts of spam messages to my contacts." },
+  { title: "Code 02", sub: "Fake Account", body: "This is a fake account impersonating a well-known person." },
+  { title: "Code 03", sub: "Harassment", body: "The user is constantly harassing and threatening me." },
+  { title: "Code 04", sub: "Scam / Fraud", body: "This account is trying to scam me by asking for money." },
+  { title: "Code 05", sub: "Phishing Link", body: "The user is sending malicious phishing links." },
+  { title: "Code 06", sub: "Inappropriate", body: "This account is sending inappropriate images and texts." },
+  { title: "Code 07", sub: "Hacked Account", body: "This account appears to be hacked and is sending spam to everyone." },
+  { title: "Code 08", sub: "OTP Scam", body: "The user is asking for my WhatsApp OTP code to hack my account." },
+  { title: "Code 09", sub: "Illegal Goods", body: "The user is selling illegal items through WhatsApp." },
+  { title: "Code 10", sub: "Abusive Language", body: "The user is using highly abusive and offensive language." },
+  { title: "Code 11", sub: "Stolen Identity", body: "This account stole someone else's photos to create a fake profile." },
+  { title: "Code 12", sub: "Crypto Scam", body: "The user is running a fake cryptocurrency investment scam." },
+  { title: "Code 13", sub: "Job Scam", body: "This account is offering fake jobs and asking for registration fees." },
+  { title: "Code 14", sub: "Underage", body: "I believe this account is being operated by an underage user." },
+  { title: "Code 15", sub: "Impersonation", body: "This user is impersonating a business to steal customer data." },
+  { title: "Code 16", sub: "Loan Scam", body: "The user is offering fake loans with high hidden interest rates." },
+  { title: "Code 17", sub: "Malware", body: "The user sent me an APK file that contains malware." },
+  { title: "Code 18", sub: "Repeated Contact", body: "I blocked this number but they keep messaging me from new accounts." },
+  { title: "Code 19", sub: "Defamation", body: "The user is spreading false rumors about me in groups." },
+  { title: "Code 20", sub: "Group Spam", body: "This user is adding hundreds of people to spam groups." }
+];
+
+// 20 Unban Templates (Subject & Body)
+const unbanCodes = [
+  { title: "Code 01", sub: "Wrongly Banned", body: "My account was banned by mistake. I have not violated any terms." },
+  { title: "Code 02", sub: "Hacked", body: "My account was hacked and the hacker did the violations. Please restore my access." },
+  { title: "Code 03", sub: "Business Use", body: "I use this number for my small business and I follow all rules. Please unban." },
+  { title: "Code 04", sub: "False Report", body: "Someone reported my account falsely out of jealousy. Please review my chats." },
+  { title: "Code 05", sub: "Family Contact", body: "This is my primary number for family contact. I haven't done anything wrong." },
+  { title: "Code 06", sub: "No Spam", body: "I have never sent spam messages. My account was flagged automatically." },
+  { title: "Code 07", sub: "Automated Error", body: "I believe an automated system wrongly banned my account. Please check manually." },
+  { title: "Code 08", sub: "Old User", body: "I have been using WhatsApp for years without any issues. Please restore." },
+  { title: "Code 09", sub: "Client Contact", body: "I communicate with my clients through this number. Unban please." },
+  { title: "Code 10", sub: "Misunderstanding", body: "This is a complete misunderstanding. I did not break any rules." },
+  { title: "Code 11", sub: "Data Loss", body: "I have important photos and messages. Please unban my number." },
+  { title: "Code 12", sub: "Fraud Alert Error", body: "My account was mistakenly flagged for fraud. I am a genuine user." },
+  { title: "Code 13", sub: "Appeal Review", body: "I kindly request a manual review of my account ban." },
+  { title: "Code 14", sub: "New Account", body: "My new account got banned for no reason. Please help." },
+  { title: "Code 15", sub: "Group Admin", body: "I am an admin of several community groups. I follow all guidelines." },
+  { title: "Code 16", sub: "Second Number", body: "I use this as my secondary number. I haven't spammed anyone." },
+  { title: "Code 17", sub: "Verification Needed", body: "Please verify my identity if needed, but unban my account." },
+  { title: "Code 18", sub: "System Glitch", body: "I think there is a system glitch that caused this ban. Please fix it." },
+  { title: "Code 19", sub: "Promise to Comply", body: "If I made any mistake unknowingly, I apologize. Please unban." },
+  { title: "Code 20", sub: "Urgent Restore", body: "I need my account back urgently for work. Please lift the ban." }
+];
+
+// Verify Button
+$('verifyBtn').addEventListener('click', () => {
+  const rawPhone = $('phone').value.trim();
+  const phone = rawPhone.replace(/[^\d+]/g, "");
+
+  if (!/^\+?[1-9]\d{7,14}$/.test(phone)) {
+    showToast("Please enter a valid international phone number.", true);
+    return;
+  }
+
+  currentPhone = phone;
+  $('verifyCard').style.display = "none";
+  $('codesCard').style.display = "block";
+  renderCodes();
+  showToast("Number verified successfully!");
+});
+
+// Tab Switching
+document.querySelectorAll('.mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.mode-tab').forEach(t => {
+      t.classList.remove('active', 'ban', 'unban');
+    });
+    currentMode = tab.dataset.mode;
+    tab.classList.add('active', currentMode);
+    renderCodes();
+  });
+});
+
+// Render Codes
+function renderCodes() {
+  const grid = $('codesGrid');
+  grid.innerHTML = "";
+  
+  const codes = currentMode === 'ban' ? banCodes : unbanCodes;
+  
+  codes.forEach((code, index) => {
+    const btn = document.createElement('button');
+    btn.className = `code-btn ${currentMode}`;
+    btn.innerHTML = `
+      <div class="code-title">${code.title} - ${code.sub}</div>
+      <div class="code-desc">${code.body.substring(0, 40)}...</div>
+    `;
+    
+    btn.addEventListener('click', () => {
+      sendEmail(currentPhone, currentMode, index, code);
+    });
+    
+    grid.appendChild(btn);
+  });
+}
+
+// Send Email Function
+function sendEmail(phone, mode, index, codeData) {
+  const action = mode === 'ban' ? 'Ban Request' : 'Unban Request';
+  const subject = `WhatsApp ${action} - ${phone} (${codeData.title})`;
+  
+  const emailBody = `Hello WhatsApp Support,
+
+I am writing to request a ${mode} for the following WhatsApp number.
+
+Target Number: ${phone}
+Action: ${action}
+Reason Category: ${codeData.sub}
+
+Details:
+${codeData.body}
+
+Please review this number and take appropriate action as per WhatsApp's Terms of Service.
+
+Thank you,
+A concerned user`;
+
+  // Create mailto link (Opens Default Email App like Gmail)
+  const mailtoLink = `mailto:support@support.whatsapp.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+  
+  window.location.href = mailtoLink;
+  showToast(`Opening Email App for ${action}...`);
+}
+
+/* =====================================
+   SHARE MODAL LOGIC
+===================================== */
+const shareModal = $('shareModal');
+const shareUrlInput = $('shareUrl');
+const PAGE_SHARE_URL = "https://dg-dev-livid.vercel.app/wp-ban-unban";
+
+$('shareOpen').addEventListener('click', () => {
+  shareUrlInput.value = PAGE_SHARE_URL;
+  shareModal.classList.add('show');
+});
+
+$('closeModal').addEventListener('click', () => shareModal.classList.remove('show'));
+
+shareModal.addEventListener('click', event => {
+  if (event.target === shareModal) shareModal.classList.remove('show');
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') shareModal.classList.remove('show');
+});
+
+$('copyBtn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(PAGE_SHARE_URL);
+    showToast('Page link copied successfully!');
+    shareModal.classList.remove('show');
+  } catch (err) {
+    const temp = document.createElement('textarea');
+    temp.value = PAGE_SHARE_URL;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand('copy');
+    temp.remove();
+    showToast('Page link copied successfully!');
+    shareModal.classList.remove('show');
+  }
+});
+
+$('nativeShare').addEventListener('click', async () => {
+  const shareData = {
+    title: "DG-DEV WP Ban & Unban",
+    text: "Ban or Unban WhatsApp numbers using DG-DEV.",
+    url: PAGE_SHARE_URL
+  };
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        showToast("Sharing was not completed.", true);
+      }
+    }
+  } else {
+    try {
+      await navigator.clipboard.writeText(PAGE_SHARE_URL);
+      showToast("Page link copied successfully!");
+      shareModal.classList.remove('show');
+    } catch (err) {
+      showToast("Sharing is not supported on this browser.", true);
+    }
+  }
+});
 </script>
+
 </body>
 </html>
