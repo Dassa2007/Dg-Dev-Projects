@@ -1,114 +1,730 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Text Generator - DG-DEV PROJECTS</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<script>(function(){const t=localStorage.getItem('dgdev-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080808">
+<title>Text Generator | DG-DEV PROJECTS</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
 <style>
-.output-list{display:flex;flex-direction:column;gap:8px;margin-top:20px;max-height:500px;overflow-y:auto;padding-right:4px}
-.output-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px;animation:outIn .3s}
-@keyframes outIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.output-text{flex:1;font-size:.95rem;word-break:break-word}
-.copy-btn{padding:6px 14px;background:var(--accent-grad);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:.8rem}
-.top-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.top-row>*{flex:1;min-width:140px}
-.btn-wrapper{position:relative;display:inline-block}
-.btn{--border-radius:24px;--padding:4px;--transition:0.4s;--button-color:#101010;--highlight-color-hue:210deg;user-select:none;display:flex;justify-content:center;padding:0.5em 0.5em 0.5em 1.1em;font-family:"Poppins","Inter",sans-serif;font-size:1em;font-weight:400;background-color:var(--button-color);color:#fff;box-shadow:inset 0 1px 1px #fff3,inset 0 2px 2px #fff2,inset 0 4px 4px #fff1,0 -1px 1px #0001;border:solid 1px #fff2;border-radius:var(--border-radius);cursor:pointer;position:relative}
-.btn::before{content:"";position:absolute;top:calc(0px - var(--padding));left:calc(0px - var(--padding));width:calc(100% + var(--padding) * 2);height:calc(100% + var(--padding) * 2);border-radius:calc(var(--border-radius) + var(--padding));pointer-events:none;background:linear-gradient(0deg,#0004,#000a);z-index:-1}
-.btn-letter{position:relative;display:inline-block;color:#fff5;animation:letter-anim 2s ease-in-out infinite}
-@keyframes letter-anim{50%{text-shadow:0 0 3px #fff8;color:#fff}}
-.btn-svg{flex-grow:1;height:24px;margin-right:0.5rem;fill:#e8e8e8;animation:flicker 2s linear infinite;animation-delay:0.5s}
-@keyframes flicker{50%{opacity:0.3}}
-.txt-wrapper{position:relative;display:flex;align-items:center;min-width:6.4em}
-.txt-1,.txt-2{position:absolute;word-spacing:-1em}
-.txt-1{animation:appear-anim 1s ease-in-out forwards}
-.txt-2{opacity:0}
-@keyframes appear-anim{0%{opacity:0}100%{opacity:1}}
-.btn:focus .txt-1{animation:opacity-anim 0.3s ease-in-out forwards;animation-delay:1s}
-.btn:focus .txt-2{animation:opacity-anim 0.3s ease-in-out reverse forwards;animation-delay:1s}
-@keyframes opacity-anim{0%{opacity:1}100%{opacity:0}}
-.btn:focus .btn-letter{animation:focused-letter-anim 1s ease-in-out forwards,letter-anim 1.2s ease-in-out infinite;animation-delay:0s,1s}
-@keyframes focused-letter-anim{0%,100%{filter:blur(0)}50%{transform:scale(2);filter:blur(10px) brightness(150%) drop-shadow(-36px 12px 12px hsl(var(--highlight-color-hue),100%,70%))}}
-.btn:hover{border:solid 1px hsla(var(--highlight-color-hue),100%,80%,40%)}
+:root {
+  --red: #ff1744;
+  --red2: #b5002c;
+  --bg: #080808;
+  --card: #111113;
+  --card2: #171719;
+  --border: #303036;
+  --white: #f8f8fa;
+  --muted: #a1a1aa;
+  --glow: rgba(255,23,68,.18);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 10% 10%, rgba(255,23,68,.13), transparent 35%),
+    radial-gradient(ellipse at 90% 85%, rgba(181,0,44,.12), transparent 35%),
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+    #080808;
+  background-size: auto, auto, 35px 35px, 35px 35px, auto;
+  background-attachment: fixed;
+  color: var(--white);
+  font-family: Inter, "Noto Sans Sinhala", sans-serif;
+  overflow-x: hidden;
+}
+
+body::before, body::after {
+  content: ""; position: fixed; width: 250px; height: 250px;
+  border-radius: 50%; filter: blur(100px); opacity: .18;
+  pointer-events: none; z-index: -1; animation: glowMove 10s ease-in-out infinite alternate;
+}
+body::before { background: var(--red); top: 10%; left: -120px; }
+body::after { background: #a000ff; right: -120px; bottom: 5%; animation-delay: -5s; }
+@keyframes glowMove { to { transform: translate(50px,-35px) scale(1.2) } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px) } to { opacity: 1; transform: translateY(0) } }
+
+/* =====================================
+   HEADER & NAVIGATION
+===================================== */
+.header {
+  width: 100%; height: 75px; position: sticky; top: 0; z-index: 1000;
+  background: rgba(5,5,5,.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.header-inner {
+  max-width: 1250px; height: 100%; margin: auto; padding: 0 22px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  display: flex; align-items: center; gap: 12px; font-family: 'Space Grotesk', sans-serif;
+  font-size: 21px; font-weight: 800; letter-spacing: 1px; text-decoration: none; color: white;
+}
+.logo span { color: var(--red); }
+.logo-icon {
+  width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px;
+  color: white; background: linear-gradient(145deg, #ff1744, #760015); box-shadow: 0 0 20px rgba(255,23,68,.35);
+}
+.menu-toggle {
+  width: 46px; height: 46px; border-radius: 13px; border: 1px solid rgba(255,23,68,.5);
+  background: rgba(255,23,68,.08); display: flex; flex-direction: column; justify-content: center;
+  align-items: center; gap: 6px; transition: .3s; z-index: 1002;
+}
+.menu-toggle:hover { background: var(--red); box-shadow: 0 0 20px rgba(255,23,68,.5); }
+.menu-toggle span { width: 21px; height: 2px; background: white; border-radius: 5px; transition: .3s; }
+.menu-toggle.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.menu-toggle.active span:nth-child(2) { opacity: 0; transform: translateX(-10px); }
+.menu-toggle.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+.nav-overlay {
+  position: fixed; inset: 0; z-index: 998; background: rgba(0,0,0,.7);
+  opacity: 0; visibility: hidden; transition: .3s;
+}
+.nav-overlay.active { opacity: 1; visibility: visible; }
+.side-menu {
+  position: fixed; z-index: 1001; top: 0; right: -360px; width: 320px; max-width: 85%;
+  height: 100vh; padding: 100px 22px 30px; background: rgba(10,10,10,.97);
+  backdrop-filter: blur(20px); border-left: 1px solid rgba(255,23,68,.25);
+  transition: .4s cubic-bezier(.77,0,.18,1); overflow-y: auto;
+}
+.side-menu.active { right: 0; }
+.menu-heading { color: var(--red); font-family: 'Space Grotesk', sans-serif; font-size: 12px; letter-spacing: 3px; margin-bottom: 20px; }
+.menu-link {
+  display: flex; align-items: center; gap: 15px; padding: 15px; margin-bottom: 9px;
+  background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px; color: #ddd; font-size: 14px; transition: .3s; text-decoration: none;
+}
+.menu-link i { width: 22px; text-align: center; color: var(--red); font-size: 16px; }
+.menu-link:hover { background: rgba(255,23,68,.12); border-color: var(--red); transform: translateX(-5px); color: white; }
+.menu-link.active { background: rgba(255,23,68,.15); border-color: var(--red); color: #fff; }
+.menu-label { padding: 18px 5px 8px; color: #ff536f; font-family: 'Space Grotesk', sans-serif; font-size: 11px; letter-spacing: 2px; }
+
+/* =====================================
+   NEW RED NEON LOADER
+===================================== */
+.dgdev-loader-overlay {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 25px; z-index: 99999;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.dgdev-loader-overlay.hidden { opacity: 0; visibility: hidden; }
+.loader-wrapper { position: relative; width: 100px; height: 100px; }
+.loader-wrapper .inner {
+  position: absolute; box-sizing: border-box; width: 100%; height: 100%;
+  border-radius: 50%; border: 4px solid transparent;
+}
+.loader-wrapper .inner.one { border-top-color: #ff1744; border-right-color: #ff1744; animation: rotate-one 1s linear infinite; }
+.loader-wrapper .inner.two { border-bottom-color: #ff003c; border-left-color: #ff003c; animation: rotate-two 1s linear infinite; }
+.loader-wrapper .inner.three { border-top-color: #ff526d; border-right-color: #ff526d; animation: rotate-three 1s linear infinite; }
+@keyframes rotate-one { 0% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg); } 100% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg); } }
+@keyframes rotate-two { 0% { transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg); } 100% { transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg); } }
+@keyframes rotate-three { 0% { transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg); } 100% { transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg); } }
+.loader-brand {
+  font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 3px;
+  color: var(--red); animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+/* =====================================
+   PAGE SPECIFIC STYLES
+===================================== */
+.container {
+  width: min(900px, calc(100% - 30px));
+  margin: auto;
+  padding: 40px 0 60px;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 28px;
+  animation: fadeUp .7s ease both;
+}
+
+.logo-badge {
+  display: inline-flex; align-items: center; gap: 8px; color: #ff637e;
+  font-size: 12px; font-weight: 800; letter-spacing: 3px; margin-bottom: 15px;
+  padding: 8px 15px; border: 1px solid rgba(255,23,68,.3);
+  border-radius: 30px; background: rgba(255,23,68,.07);
+}
+.logo-dot { width: 7px; height: 7px; background: var(--red); border-radius: 50%; box-shadow: 0 0 12px var(--red); }
+
+h1 { font-family: Outfit, Inter, sans-serif; font-size: clamp(28px, 6vw, 43px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.2; }
+h1 span { color: var(--red); text-shadow: 0 0 25px rgba(255,23,68,.4); }
+.subtitle { max-width: 550px; margin: 12px auto 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+.card {
+  position: relative; background: linear-gradient(145deg, #151517, #0e0e10);
+  border: 1px solid rgba(255,23,68,.24); border-radius: 22px;
+  padding: clamp(17px, 4vw, 30px); box-shadow: 0 20px 65px rgba(0,0,0,.5);
+  overflow: hidden; animation: fadeUp .8s ease both;
+}
+.card::before {
+  content: ""; position: absolute; top: 0; left: 10%; width: 80%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
+}
+
+.label { display: block; color: #f4f4f5; font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+textarea, select, input[type="number"] {
+  width: 100%; color: white; background: #09090b; border: 1px solid #34343a;
+  border-radius: 12px; padding: 13px 14px; font: 14px Inter, "Noto Sans Sinhala", sans-serif;
+  outline: none; transition: .25s;
+}
+textarea { min-height: 125px; resize: vertical; line-height: 1.7; }
+textarea::placeholder, input::placeholder { color: #686870; }
+textarea:focus, select:focus, input[type="number"]:focus { border-color: var(--red); box-shadow: 0 0 0 3px var(--glow); }
+select option { background: #111; color: white; }
+
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+.field { min-width: 0; }
+
+.custom-box {
+  margin-top: 18px; padding: 16px; border: 1px solid rgba(255,23,68,.25);
+  border-radius: 14px; background: rgba(255,23,68,.045); transition: .25s;
+}
+.custom-box.active { border-color: var(--red); box-shadow: 0 0 18px rgba(255,23,68,.08); }
+.check-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; font-weight: 700; }
+.check-label input { width: 18px; height: 18px; accent-color: var(--red); cursor: pointer; }
+.custom-input-area { display: none; margin-top: 15px; animation: fadeUp .25s ease; }
+.custom-input-area.show { display: block; }
+.hint { display: block; color: var(--muted); font-size: 11px; margin-top: 8px; line-height: 1.6; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 23px; }
+button { font-family: Inter, "Noto Sans Sinhala", sans-serif; }
+.btn {
+  border: 0; border-radius: 12px; padding: 12px 18px; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: .25s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn:hover { transform: translateY(-3px); }
+.btn:active { transform: scale(.97); }
+
+.generate-btn { color: white; background: linear-gradient(135deg, #ff1744, #a5002a); box-shadow: 0 7px 25px rgba(255,23,68,.25); min-width: 180px; }
+.generate-btn:hover { box-shadow: 0 10px 30px rgba(255,23,68,.4); }
+.secondary-btn { color: #f4f4f5; background: #19191c; border: 1px solid #35353b; }
+.secondary-btn:hover { border-color: var(--red); background: rgba(255,23,68,.1); }
+
+.results-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #303036; }
+.results-header h2 { font: 700 17px Outfit, Inter, sans-serif; }
+.count { color: #ff6b85; background: rgba(255,23,68,.12); border: 1px solid rgba(255,23,68,.2); padding: 6px 12px; border-radius: 30px; font-size: 11px; font-weight: 800; }
+
+.empty { margin-top: 17px; text-align: center; padding: 35px 15px; border: 1px dashed #39393f; border-radius: 14px; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.empty-icon { font-size: 32px; margin-bottom: 10px; }
+
+.output-list { display: flex; flex-direction: column; gap: 9px; max-height: 520px; overflow-y: auto; margin-top: 17px; padding-right: 4px; }
+.output-item {
+  display: flex; align-items: center; gap: 10px; justify-content: space-between;
+  padding: 12px; border: 1px solid #303036; border-radius: 12px;
+  background: linear-gradient(110deg, #18181b, #101012); animation: fadeUp .25s ease both; transition: .2s;
+}
+.output-item:hover { border-color: var(--red); transform: translateX(3px); }
+.output-text { flex: 1; min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; font-size: 13px; line-height: 1.6; }
+.copy-btn { flex: none; border: 0; color: white; background: linear-gradient(135deg, #ff1744, #a5002a); padding: 8px 13px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer; }
+.copy-btn:hover { filter: brightness(1.2); }
+
+/* =====================================
+   SHARE MODAL (Standard)
+===================================== */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 2000; display: none; align-items: center;
+  justify-content: center; padding: 20px; background: rgba(0,0,0,.78);
+  backdrop-filter: blur(9px);
+}
+.modal-overlay.show { display: flex; animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.share-modal {
+  width: 100%; max-width: 390px; padding: 25px; border-radius: 20px;
+  background: linear-gradient(145deg, #1b1b1b, #0d0d0d);
+  border: 1px solid rgba(255,50,50,.35);
+  box-shadow: 0 20px 80px rgba(0,0,0,.65), 0 0 35px rgba(255,0,0,.08);
+  position: relative; animation: modalUp .3s ease;
+}
+@keyframes modalUp { from { opacity: 0; transform: translateY(20px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.close-modal {
+  position: absolute; right: 15px; top: 15px; width: 33px; height: 33px;
+  border-radius: 9px; border: 1px solid var(--border); background: #222; color: white; cursor: pointer;
+}
+.share-modal-icon {
+  width: 57px; height: 57px; border-radius: 17px; display: grid; place-items: center;
+  background: rgba(255,35,35,.14); color: var(--red); font-size: 24px; margin-bottom: 17px;
+}
+.share-modal h2 { font-family: 'Space Grotesk', sans-serif; font-size: 21px; margin-bottom: 8px; }
+.share-modal p { color: var(--muted); font-size: 12px; line-height: 1.7; margin-bottom: 18px; }
+.share-link-box { display: flex; gap: 7px; padding: 7px; border-radius: 11px; background: #080808; border: 1px solid var(--border); }
+.share-link-box input { width: 100%; min-width: 0; border: none; outline: none; background: transparent; color: #eeeeee; padding: 7px; font-size: 11px; }
+.share-copy { flex-shrink: 0; border: none; border-radius: 8px; padding: 10px 12px; background: var(--red); color: white; font-size: 11px; font-weight: 700; cursor: pointer; }
+.modal-share-btn { width: 100%; margin-top: 12px; border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: #202020; color: white; font-size: 12px; font-weight: 700; cursor: pointer; }
+.modal-share-btn:hover { border-color: var(--red); }
+
+/* TOAST */
+.toast {
+  position: fixed; z-index: 3000; left: 50%; bottom: 25px; transform: translate(-50%, 20px);
+  opacity: 0; pointer-events: none; padding: 12px 18px; border-radius: 11px;
+  background: #202020; border: 1px solid rgba(255,255,255,.12); color: white;
+  font-size: 12px; font-weight: 600; text-align: center; box-shadow: 0 10px 35px rgba(0,0,0,.5);
+  transition: .25s; max-width: calc(100% - 30px);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media(max-width: 600px) {
+  .container { padding: 30px 0 60px; }
+  .fields { grid-template-columns: 1fr; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .generate-btn { grid-column: 1/-1; }
+  .actions .btn { width: 100%; }
+  .card { border-radius: 17px; }
+  .output-item { padding: 10px; }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
 </style>
 </head>
+
 <body>
-<main class="page-container">
-  <h1 class="page-title">Unlimited Text Generator ✍️</h1>
-  <p class="page-subtitle">Generate unlimited copies of any text. Copy all with one click.</p>
-  <div class="card">
-    <div class="form-group">
-      <label class="form-label">Your Message</label>
-      <textarea class="form-textarea" id="messageInput" rows="4" placeholder="Type your message here..."></textarea>
+
+<!-- NEW RED NEON LOADER -->
+<div class="dgdev-loader-overlay" id="dgdev-loader">
+  <div class="loader-wrapper">
+    <div class="inner one"></div>
+    <div class="inner two"></div>
+    <div class="inner three"></div>
+  </div>
+  <div class="loader-brand">DG-DEV LOADING</div>
+</div>
+
+<!-- HEADER (From Home Page) -->
+<header class="header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon"><i class="fa-solid fa-code"></i></div>
+      DG-<span>DEV</span>
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- MENU OVERLAY -->
+<div class="nav-overlay" id="navOverlay"></div>
+
+<!-- SIDE MENU -->
+<nav class="side-menu" id="sideMenu">
+  <div class="menu-heading">DG-DEV NAVIGATION</div>
+  <a href="index.html" class="menu-link"><i class="fa-solid fa-house"></i> Home</a>
+  <a href="profile.html" class="menu-link"><i class="fa-solid fa-user"></i> Profile</a>
+  
+  <div class="menu-label">PREMIUM TOOLS</div>
+  <a href="image-cut.html" class="menu-link"><i class="fa-solid fa-object-group"></i> Image Cut</a>
+  <a href="img-url-generator.html" class="menu-link"><i class="fa-solid fa-link"></i> Img URL Generator</a>
+  <a href="av-url-generator.html" class="menu-link"><i class="fa-solid fa-clapperboard"></i> Audio & Video Gen</a>
+  <a href="subtitle-translator.html" class="menu-link"><i class="fa-solid fa-language"></i> Subtitles Translator</a>
+  <a href="subtitle-converter.html" class="menu-link"><i class="fa-solid fa-arrows-rotate"></i> Sub Converter</a>
+  <a href="modz-downloader.html" class="menu-link"><i class="fa-solid fa-cloud-arrow-down"></i> Modz Downloader</a>
+  <a href="social-downloader.html" class="menu-link"><i class="fa-solid fa-photo-film"></i> Social Downloader</a>
+  <a href="wp-ban-unban.html" class="menu-link"><i class="fa-solid fa-shield-halved"></i> WP Ban & Unban</a>
+  <a href="whatsapp-report.html" class="menu-link"><i class="fa-brands fa-whatsapp"></i> WhatsApp Report</a>
+  <a href="text-generator.html" class="menu-link active"><i class="fa-solid fa-wand-magic-sparkles"></i> Text Generator</a>
+  <a href="1xbet-signals.html" class="menu-link"><i class="fa-solid fa-chart-line"></i> 1x Bet Signals</a>
+  <a href="crypto-course.html" class="menu-link"><i class="fa-brands fa-bitcoin"></i> Crypto Course</a>
+  <a href="about.html" class="menu-link"><i class="fa-solid fa-circle-info"></i> About</a>
+</nav>
+
+<div class="container">
+
+  <div style="display:flex; justify-content:flex-end; padding-top: 20px; animation: fadeUp .5s both;">
+    <button class="share-btn" id="shareOpen" style="border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; padding: 11px 18px; border-radius: 11px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px; transition: .25s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
+      <i class="fa-solid fa-share-nodes"></i> Share
+    </button>
+  </div>
+
+  <header class="page-header" style="padding-top: 20px;">
+    <div class="logo-badge">
+      <span class="logo-dot"></span>
+      DG-DEV PROJECTS
     </div>
-    <div class="top-row">
-      <div class="form-group" style="margin:0">
-        <label class="form-label">Quantity</label>
-        <select class="form-select" id="qtySelect">
-          <option value="10">10</option><option value="25">25</option>
-          <option value="50" selected>50</option><option value="100">100</option>
-          <option value="200">200</option><option value="500">500</option>
+
+    <h1>Unlimited <span>Text Generator</span> ✍️</h1>
+
+    <p class="subtitle">
+      Generate multiple copies of your message instantly.
+      Copy individual messages or all generated text with one click.
+    </p>
+  </header>
+
+  <main class="card">
+
+    <div class="field">
+      <label class="label" for="messageInput">✏️ Your Message</label>
+      <textarea id="messageInput" maxlength="20000" placeholder="Type your message here..."></textarea>
+    </div>
+
+    <div class="fields">
+      <div class="field">
+        <label class="label" for="qtySelect">🔢 Quantity</label>
+        <select id="qtySelect">
+          <option value="10">10 Copies</option>
+          <option value="25">25 Copies</option>
+          <option value="50" selected>50 Copies</option>
+          <option value="100">100 Copies</option>
+          <option value="200">200 Copies</option>
+          <option value="500">500 Copies</option>
         </select>
       </div>
-      <div class="form-group" style="margin:0">
-        <label class="form-label">Font</label>
-        <select class="form-select" id="fontSelect">
+
+      <div class="field">
+        <label class="label" for="fontSelect">🔤 Font Style</label>
+        <select id="fontSelect">
           <option value="Inter">Inter</option>
           <option value="Noto Sans Sinhala">Noto Sans Sinhala</option>
-          <option value="Poppins">Poppins</option>
+          <option value="Outfit">Outfit</option>
           <option value="Arial">Arial</option>
           <option value="Georgia">Georgia</option>
           <option value="Courier New">Courier New</option>
         </select>
       </div>
     </div>
-    <div style="text-align:center;margin:20px 0">
-      <div class="btn-wrapper">
-        <button class="btn" id="genBtn" type="button">
-          <svg class="btn-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/></svg>
-          <div class="txt-wrapper">
-            <div class="txt-1"><span class="btn-letter">G</span><span class="btn-letter">e</span><span class="btn-letter">n</span><span class="btn-letter">e</span><span class="btn-letter">r</span><span class="btn-letter">a</span><span class="btn-letter">t</span><span class="btn-letter">e</span></div>
-            <div class="txt-2"><span class="btn-letter">G</span><span class="btn-letter">e</span><span class="btn-letter">n</span><span class="btn-letter">e</span><span class="btn-letter">r</span><span class="btn-letter">a</span><span class="btn-letter">t</span><span class="btn-letter">i</span><span class="btn-letter">n</span><span class="btn-letter">g</span></div>
-          </div>
-        </button>
+
+    <div class="custom-box" id="customBox">
+      <label class="check-label">
+        <input type="checkbox" id="customToggle">
+        Enable Custom Quantity
+      </label>
+
+      <div class="custom-input-area" id="customArea">
+        <label class="label" for="customQty">Enter Your Amount</label>
+        <input type="number" id="customQty" min="1" max="5000" step="1" placeholder="Example: 750">
+        <small class="hint">
+          Enter your preferred number from 1 to 5,000.
+          Your custom amount will be used instead of the preset quantity.
+        </small>
       </div>
     </div>
-    <div style="display:flex;gap:10px;justify-content:center">
-      <button class="btn-secondary" id="copyAllBtn">📋 Copy All</button>
-      <button class="btn-secondary" id="clearBtn">🗑️ Clear</button>
+
+    <div class="actions">
+      <button class="btn generate-btn" id="generateBtn">
+        ✨ Generate Copies
+      </button>
+      <button class="btn secondary-btn" id="copyAllBtn">
+        📋 Copy All
+      </button>
+      <button class="btn secondary-btn" id="clearBtn">
+        🗑️ Clear
+      </button>
     </div>
+
+    <div class="results-header">
+      <h2>Generated Results</h2>
+      <span class="count" id="resultCount">0 COPIES</span>
+    </div>
+
+    <div class="empty" id="emptyState">
+      <div class="empty-icon">📝</div>
+      <strong>Your generated text will appear here</strong>
+      <p>Enter a message and press Generate Copies.</p>
+    </div>
+
     <div class="output-list" id="outputList"></div>
+
+  </main>
+</div>
+
+<!-- SHARE MODAL (Standard) -->
+<div class="modal-overlay" id="shareModal">
+  <div class="share-modal">
+    <button class="close-modal" id="closeModal" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div class="share-modal-icon">
+      <i class="fa-solid fa-share-nodes"></i>
+    </div>
+    <h2>Share This Tool</h2>
+    <p>Share the DG-DEV Text Generator with your friends. Copy the page link below.</p>
+    
+    <div class="share-link-box">
+      <input type="text" id="shareUrl" readonly>
+      <button class="share-copy" id="copyBtn">
+        <i class="fa-regular fa-copy"></i> Copy
+      </button>
+    </div>
+    
+    <button class="modal-share-btn" id="nativeShare">
+      <i class="fa-solid fa-arrow-up-from-bracket"></i> Share with other apps
+    </button>
   </div>
-</main>
-<script src="main.js"></script>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
-(function(){
-  const msgInput=document.getElementById('messageInput'),qtySelect=document.getElementById('qtySelect'),fontSelect=document.getElementById('fontSelect'),genBtn=document.getElementById('genBtn'),outputList=document.getElementById('outputList'),copyAllBtn=document.getElementById('copyAllBtn'),clearBtn=document.getElementById('clearBtn');
-  genBtn.onclick=()=>{
-    const msg=msgInput.value.trim(),qty=parseInt(qtySelect.value,10),font=fontSelect.value;
-    if(!msg){window.dgdevToast('Enter a message first','error');return}
-    outputList.innerHTML='';
-    for(let i=0;i<qty;i++){
-      const item=document.createElement('div');item.className='output-item';item.style.fontFamily=`'${font}',sans-serif`;
-      item.innerHTML='<span class="output-text"></span><button class="copy-btn">Copy</button>';
-      item.querySelector('.output-text').textContent=msg;
-      item.querySelector('.copy-btn').onclick=()=>{copyToClipboard(msg);window.dgdevToast('Copied ✅')};
-      outputList.appendChild(item);
+/* =====================================
+   UI & NAVIGATION
+===================================== */
+window.addEventListener('load', function() {
+  const loader = document.getElementById('dgdev-loader');
+  if (loader) {
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      setTimeout(() => loader.remove(), 500);
+    }, 600);
+  }
+});
+
+const menuToggle = document.getElementById('menuToggle');
+const sideMenu = document.getElementById('sideMenu');
+const navOverlay = document.getElementById('navOverlay');
+
+function toggleMenu() {
+  const isOpen = sideMenu.classList.toggle('active');
+  menuToggle.classList.toggle('active', isOpen);
+  navOverlay.classList.toggle('active', isOpen);
+  menuToggle.setAttribute('aria-expanded', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+
+menuToggle.addEventListener('click', toggleMenu);
+navOverlay.addEventListener('click', toggleMenu);
+
+document.querySelectorAll('.menu-link').forEach(link => {
+  link.addEventListener('click', () => {
+    sideMenu.classList.remove('active');
+    menuToggle.classList.remove('active');
+    navOverlay.classList.remove('active');
+    menuToggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') {
+    sideMenu.classList.remove('active');
+    menuToggle.classList.remove('active');
+    navOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+});
+
+/* =====================================
+   TEXT GENERATOR LOGIC
+===================================== */
+const messageInput = document.getElementById("messageInput");
+const qtySelect = document.getElementById("qtySelect");
+const fontSelect = document.getElementById("fontSelect");
+const customToggle = document.getElementById("customToggle");
+const customArea = document.getElementById("customArea");
+const customBox = document.getElementById("customBox");
+const customQty = document.getElementById("customQty");
+const generateBtn = document.getElementById("generateBtn");
+const copyAllBtn = document.getElementById("copyAllBtn");
+const clearBtn = document.getElementById("clearBtn");
+const outputList = document.getElementById("outputList");
+const resultCount = document.getElementById("resultCount");
+const emptyState = document.getElementById("emptyState");
+const toastElement = document.getElementById("toast");
+
+let toastTimer;
+
+function showToast(message, error = false) {
+  toastElement.textContent = message;
+  toastElement.style.borderLeft = error ? '4px solid #ef4444' : '4px solid #22c55e';
+  toastElement.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toastElement.classList.remove("show");
+  }, 2500);
+}
+
+/* CUSTOM QUANTITY CHECKBOX */
+customToggle.addEventListener("change", () => {
+  customArea.classList.toggle("show", customToggle.checked);
+  customBox.classList.toggle("active", customToggle.checked);
+});
+
+/* COPY FUNCTION */
+async function copyText(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
     }
-    window.dgdevToast(`Generated ${qty} copies ✅`);
-    setTimeout(()=>genBtn.blur(),1600);
+  } catch(error) {}
+
+  const temp = document.createElement("textarea");
+  temp.value = text;
+  temp.style.position = "fixed";
+  temp.style.opacity = "0";
+  document.body.appendChild(temp);
+  temp.select();
+
+  let success = false;
+  try { success = document.execCommand("copy"); } catch(error) {}
+  temp.remove();
+  return success;
+}
+
+/* UPDATE RESULT COUNT */
+function updateResults() {
+  const amount = outputList.querySelectorAll(".output-item").length;
+  resultCount.textContent = amount.toLocaleString() + (amount === 1 ? " COPY" : " COPIES");
+  emptyState.style.display = amount ? "none" : "block";
+}
+
+/* GENERATE BUTTON */
+generateBtn.addEventListener("click", () => {
+  const message = messageInput.value.trim();
+  if (!message) {
+    showToast("Please enter your message first!");
+    messageInput.focus();
+    return;
+  }
+
+  let amount = Number(qtySelect.value);
+
+  if (customToggle.checked) {
+    amount = Number(customQty.value);
+    if (!Number.isInteger(amount) || amount < 1 || amount > 5000) {
+      showToast("Enter a number between 1 and 5,000!");
+      customQty.focus();
+      return;
+    }
+  }
+
+  const selectedFont = fontSelect.value;
+  const fragment = document.createDocumentFragment();
+
+  generateBtn.disabled = true;
+  generateBtn.textContent = "⏳ Generating...";
+
+  for (let i = 0; i < amount; i++) {
+    const item = document.createElement("div");
+    item.className = "output-item";
+    item.style.fontFamily = '"' + selectedFont + '", sans-serif';
+    item.style.animationDelay = Math.min(i * 8, 150) + "ms";
+
+    const text = document.createElement("span");
+    text.className = "output-text";
+    text.textContent = message;
+
+    const copyButton = document.createElement("button");
+    copyButton.className = "copy-btn";
+    copyButton.textContent = "Copy";
+    copyButton.type = "button";
+
+    copyButton.addEventListener("click", async () => {
+      const success = await copyText(message);
+      showToast(success ? "Text copied successfully! ✅" : "Copy failed!");
+    });
+
+    item.appendChild(text);
+    item.appendChild(copyButton);
+    fragment.appendChild(item);
+  }
+
+  outputList.replaceChildren(fragment);
+  updateResults();
+  showToast("Successfully generated " + amount.toLocaleString() + " copies!");
+  generateBtn.textContent = "✓ Generated!";
+
+  setTimeout(() => {
+    generateBtn.disabled = false;
+    generateBtn.innerHTML = "✨ Generate Copies";
+  }, 1000);
+});
+
+/* COPY ALL BUTTON */
+copyAllBtn.addEventListener("click", async () => {
+  const items = [...outputList.querySelectorAll(".output-text")].map(item => item.textContent);
+  if (!items.length) {
+    showToast("Nothing to copy!");
+    return;
+  }
+  const success = await copyText(items.join("\n"));
+  showToast(success ? "All " + items.length.toLocaleString() + " copies copied! ✅" : "Copy failed!");
+});
+
+/* CLEAR BUTTON */
+clearBtn.addEventListener("click", () => {
+  outputList.replaceChildren();
+  updateResults();
+  showToast("Results cleared!");
+});
+
+/* =====================================
+   SHARE MODAL LOGIC
+===================================== */
+const shareModal = document.getElementById('shareModal');
+const shareUrlInput = document.getElementById('shareUrl');
+const PAGE_SHARE_URL = "https://dg-dev-livid.vercel.app/text-generator";
+
+document.getElementById('shareOpen').addEventListener('click', () => {
+  shareUrlInput.value = PAGE_SHARE_URL;
+  shareModal.classList.add('show');
+});
+
+document.getElementById('closeModal').addEventListener('click', () => shareModal.classList.remove('show'));
+
+shareModal.addEventListener('click', event => {
+  if (event.target === shareModal) shareModal.classList.remove('show');
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') shareModal.classList.remove('show');
+});
+
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(PAGE_SHARE_URL);
+    showToast('Page link copied successfully!');
+    shareModal.classList.remove('show');
+  } catch (err) {
+    const temp = document.createElement('textarea');
+    temp.value = PAGE_SHARE_URL;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand('copy');
+    temp.remove();
+    showToast('Page link copied successfully!');
+    shareModal.classList.remove('show');
+  }
+});
+
+document.getElementById('nativeShare').addEventListener('click', async () => {
+  const shareData = {
+    title: "DG-DEV Text Generator",
+    text: "Generate unlimited text copies with DG-DEV.",
+    url: PAGE_SHARE_URL
   };
-  copyAllBtn.onclick=()=>{
-    const items=[...outputList.querySelectorAll('.output-text')].map(e=>e.textContent);
-    if(!items.length){window.dgdevToast('Nothing to copy','error');return}
-    copyToClipboard(items.join('\n'));window.dgdevToast(`Copied ${items.length} items ✅`);
-  };
-  clearBtn.onclick=()=>{outputList.innerHTML='';window.dgdevToast('Cleared')};
-  function copyToClipboard(text){if(navigator.clipboard)navigator.clipboard.writeText(text).catch(()=>fallback(text));else fallback(text)}
-  function fallback(text){const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}t.remove()}
-})();
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        showToast("Sharing was not completed.", true);
+      }
+    }
+  } else {
+    try {
+      await navigator.clipboard.writeText(PAGE_SHARE_URL);
+      showToast("Page link copied successfully!");
+      shareModal.classList.remove('show');
+    } catch (err) {
+      showToast("Sharing is not supported on this browser.", true);
+    }
+  }
+});
+
+updateResults();
 </script>
+
 </body>
-</html>
+  </html>
