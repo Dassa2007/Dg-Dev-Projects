@@ -1,83 +1,582 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>WhatsApp Report - DG-DEV PROJECTS</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<script>(function(){const t=localStorage.getItem('dgdev-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080808">
+<title>WhatsApp Report Center - DG-DEV PROJECTS</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
 <style>
-.check-row{display:flex;align-items:flex-start;gap:10px;padding:14px;background:var(--bg-2);border-radius:12px;cursor:pointer}
-.check-row input{margin-top:3px;width:20px;height:20px;accent-color:var(--primary);cursor:pointer}
-.progress-box{display:none;margin-top:24px}
-.progress-box.active{display:block}
-.progress-bar{height:12px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:12px}
-.progress-fill{height:100%;background:var(--accent-grad);width:0%;transition:width .3s;border-radius:6px}
-.report-log{max-height:300px;overflow-y:auto;background:var(--bg-2);border-radius:12px;padding:12px;margin-top:12px}
-.report-item{padding:8px 12px;border-left:3px solid var(--success);margin-bottom:6px;background:var(--card);border-radius:6px;font-size:.88rem;animation:logIn .3s}
-@keyframes logIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
-.watermark{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:.8rem;font-weight:800;letter-spacing:2px;background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;opacity:.5;pointer-events:none}
+:root {
+  --bg: #080808;
+  --panel: #121212;
+  --card2: #191919;
+  --line: #2b2b2b;
+  --text: #ffffff;
+  --muted: #999999;
+  --red: #ff3030;
+  --red2: #b90000;
+  --gradient: linear-gradient(135deg, #ff4545, #bd0000);
+  --green: #39d98a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  overflow-x: hidden;
+}
+button, input { font: inherit; }
+button { cursor: pointer; }
+
+/* =====================================
+   HEADER & NAVIGATION
+===================================== */
+.header {
+  width: 100%; height: 75px; position: sticky; top: 0; z-index: 1000;
+  background: rgba(5,5,5,.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.header-inner {
+  max-width: 1250px; height: 100%; margin: auto; padding: 0 22px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  display: flex; align-items: center; gap: 12px; font-family: 'Space Grotesk', sans-serif;
+  font-size: 21px; font-weight: 800; letter-spacing: 1px; text-decoration: none; color: white;
+}
+.logo span { color: var(--red); }
+.logo-icon {
+  width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px;
+  color: white; background: linear-gradient(145deg, #ff1744, #760015); box-shadow: 0 0 20px rgba(255,23,68,.35);
+}
+.menu-toggle {
+  width: 46px; height: 46px; border-radius: 13px; border: 1px solid rgba(255,23,68,.5);
+  background: rgba(255,23,68,.08); display: flex; flex-direction: column; justify-content: center;
+  align-items: center; gap: 6px; transition: .3s; z-index: 1002;
+}
+.menu-toggle:hover { background: var(--red); box-shadow: 0 0 20px rgba(255,23,68,.5); }
+.menu-toggle span { width: 21px; height: 2px; background: white; border-radius: 5px; transition: .3s; }
+.menu-toggle.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.menu-toggle.active span:nth-child(2) { opacity: 0; transform: translateX(-10px); }
+.menu-toggle.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+.nav-overlay {
+  position: fixed; inset: 0; z-index: 998; background: rgba(0,0,0,.7);
+  opacity: 0; visibility: hidden; transition: .3s;
+}
+.nav-overlay.active { opacity: 1; visibility: visible; }
+.side-menu {
+  position: fixed; z-index: 1001; top: 0; right: -360px; width: 320px; max-width: 85%;
+  height: 100vh; padding: 100px 22px 30px; background: rgba(10,10,10,.97);
+  backdrop-filter: blur(20px); border-left: 1px solid rgba(255,23,68,.25);
+  transition: .4s cubic-bezier(.77,0,.18,1); overflow-y: auto;
+}
+.side-menu.active { right: 0; }
+.menu-heading { color: var(--red); font-family: 'Space Grotesk', sans-serif; font-size: 12px; letter-spacing: 3px; margin-bottom: 20px; }
+.menu-link {
+  display: flex; align-items: center; gap: 15px; padding: 15px; margin-bottom: 9px;
+  background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px; color: #ddd; font-size: 14px; transition: .3s; text-decoration: none;
+}
+.menu-link i { width: 22px; text-align: center; color: var(--red); font-size: 16px; }
+.menu-link:hover { background: rgba(255,23,68,.12); border-color: var(--red); transform: translateX(-5px); color: white; }
+.menu-link.active { background: rgba(255,23,68,.15); border-color: var(--red); color: #fff; }
+.menu-label { padding: 18px 5px 8px; color: #ff536f; font-family: 'Space Grotesk', sans-serif; font-size: 11px; letter-spacing: 2px; }
+
+/* =====================================
+   NEW RED NEON LOADER
+===================================== */
+.dgdev-loader-overlay {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 25px; z-index: 99999;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.dgdev-loader-overlay.hidden { opacity: 0; visibility: hidden; }
+.loader-wrapper { position: relative; width: 100px; height: 100px; }
+.loader-wrapper .inner {
+  position: absolute; box-sizing: border-box; width: 100%; height: 100%;
+  border-radius: 50%; border: 4px solid transparent;
+}
+.loader-wrapper .inner.one { border-top-color: #ff1744; border-right-color: #ff1744; animation: rotate-one 1s linear infinite; }
+.loader-wrapper .inner.two { border-bottom-color: #ff003c; border-left-color: #ff003c; animation: rotate-two 1s linear infinite; }
+.loader-wrapper .inner.three { border-top-color: #ff526d; border-right-color: #ff526d; animation: rotate-three 1s linear infinite; }
+@keyframes rotate-one { 0% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg); } 100% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg); } }
+@keyframes rotate-two { 0% { transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg); } 100% { transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg); } }
+@keyframes rotate-three { 0% { transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg); } 100% { transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg); } }
+.loader-brand {
+  font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 3px;
+  color: var(--red); animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+/* =====================================
+   PAGE SPECIFIC STYLES
+===================================== */
+.bg { position: fixed; inset: 0; z-index: -2; overflow: hidden; background: radial-gradient(ellipse at 15% 10%, #3a0808, transparent 40%), radial-gradient(ellipse at 90% 90%, #290505, transparent 40%), #080808; }
+.grid { position: absolute; inset: 0; opacity: .12; background-image: linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px); background-size: 42px 42px; }
+.orb { position: absolute; width: 250px; height: 250px; border-radius: 50%; background: #d00000; filter: blur(100px); opacity: .2; animation: float 8s infinite alternate; }
+.orb.a { top: 5%; left: -130px; }
+.orb.b { right: -130px; bottom: 5%; animation-delay: 2s; }
+@keyframes float { to { transform: translate(90px, 70px); } }
+
+.container { width: min(100% - 28px, 760px); margin: auto; padding: 25px 0 45px; }
+
+.top-actions { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+.share-btn {
+  border: 1px solid var(--line); background: rgba(255,255,255,0.05); color: white;
+  padding: 11px 18px; border-radius: 11px; cursor: pointer; font-weight: 700;
+  display: flex; align-items: center; gap: 8px; transition: .25s;
+}
+.share-btn:hover { border-color: var(--red); background: rgba(255,48,75,.1); }
+
+.hero { text-align: center; margin-bottom: 27px; animation: fadeUp .7s ease; }
+.hero-icon { width: 78px; height: 78px; margin: 0 auto 18px; border-radius: 23px; display: grid; place-items: center; font-size: 34px; background: linear-gradient(145deg, #292929, #101010); border: 1px solid #444; box-shadow: 0 0 35px rgba(255,0,0,.13); }
+.hero h1 { font-size: clamp(25px, 6vw, 39px); font-weight: 900; letter-spacing: -1.3px; }
+.hero h1 span { background: var(--gradient); background-clip: text; color: transparent; }
+.hero p { color: var(--muted); font-size: 12px; line-height: 1.8; max-width: 480px; margin: 11px auto 0; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+.card { background: linear-gradient(145deg, #161616, #0e0e0e); border: 1px solid var(--line); border-radius: 18px; padding: 22px; margin-bottom: 18px; box-shadow: 0 15px 40px rgba(255,0,0,.04); }
+.card h2 { font-size: 16px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+.desc { color: var(--muted); font-size: 11px; line-height: 1.8; margin-bottom: 19px; }
+.label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 9px; }
+.group { margin-bottom: 17px; }
+.input { width: 100%; padding: 14px 15px; background: #090909; color: white; border: 1px solid #333; border-radius: 11px; outline: none; transition: .2s; font-size: 14px;}
+.input:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(255,0,0,.1); }
+.btn { width: 100%; padding: 15px; border: 0; border-radius: 11px; background: var(--gradient); color: white; font-size: 13px; font-weight: 900; transition: .2s; box-shadow: 0 7px 25px rgba(255,0,0,.15); display: flex; align-items: center; justify-content: center; gap: 8px;}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,0,0,.3); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.notice { padding: 13px; border: 1px solid #713333; background: rgba(255,48,48,.05); border-radius: 11px; font-size: 11px; color: #ddd; line-height: 1.8; margin-top: 16px; }
+.notice strong { color: #ff6868; }
+
+.demo-panel { display: none; }
+.demo-panel.show { display: block; animation: fadeUp .5s ease; }
+.demo-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 13px; }
+.demo-label span { font-size: 11px; color: var(--muted); }
+.demo-label b { font-size: 12px; color: #ff5555; }
+.progress { height: 10px; background: #292929; border-radius: 20px; overflow: hidden; }
+.fill { height: 100%; width: 0%; background: var(--gradient); border-radius: 20px; transition: width .35s; }
+.progress-caption { text-align: center; color: #bbb; font-size: 11px; margin-top: 12px; }
+.steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 19px 0; }
+.step { height: 38px; border: 1px solid #333; border-radius: 9px; background: #191919; display: grid; place-items: center; color: #777; font-size: 11px; font-weight: 800; transition: .3s; }
+.step.active { background: #3a1010; border-color: #ff4444; color: #fff; box-shadow: 0 0 15px rgba(255,0,0,.2); transform: scale(1.06); }
+.step.done { background: #10251b; border-color: #287e51; color: var(--green); }
+.log { max-height: 250px; overflow: auto; padding: 10px; background: #090909; border: 1px solid #282828; border-radius: 12px; }
+.log-item { display: flex; align-items: center; gap: 10px; padding: 11px; background: #151515; border: 1px solid #292929; border-radius: 9px; margin-bottom: 7px; font-size: 10px; animation: log .35s ease; }
+.log-item:last-child { margin-bottom: 0; }
+.log-icon { width: 25px; height: 25px; border-radius: 8px; background: #252525; display: grid; place-items: center; color: var(--green); }
+.log-item strong { display: block; font-size: 10px; margin-bottom: 3px; }
+.log-item small { color: #888; }
+@keyframes log { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+
+/* =====================================
+   SHARE MODAL
+===================================== */
+.modal-overlay { position: fixed; inset: 0; z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,.78); backdrop-filter: blur(9px); }
+.modal-overlay.show { display: flex; animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.share-modal { width: 100%; max-width: 390px; padding: 25px; border-radius: 20px; background: linear-gradient(145deg, #1b1b1b, #0d0d0d); border: 1px solid rgba(255,50,50,.35); box-shadow: 0 20px 80px rgba(0,0,0,.65), 0 0 35px rgba(255,0,0,.08); position: relative; animation: modalUp .3s ease; }
+@keyframes modalUp { from { opacity: 0; transform: translateY(20px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.close-modal { position: absolute; right: 15px; top: 15px; width: 33px; height: 33px; border-radius: 9px; border: 1px solid var(--line); background: #222; color: white; cursor: pointer; }
+.share-modal-icon { width: 57px; height: 57px; border-radius: 17px; display: grid; place-items: center; background: rgba(255,35,35,.14); color: var(--red); font-size: 24px; margin-bottom: 17px; }
+.share-modal h2 { font-family: 'Space Grotesk', sans-serif; font-size: 21px; margin-bottom: 8px; }
+.share-modal p { color: var(--muted); font-size: 12px; line-height: 1.7; margin-bottom: 18px; }
+.share-link-box { display: flex; gap: 7px; padding: 7px; border-radius: 11px; background: #080808; border: 1px solid var(--line); }
+.share-link-box input { width: 100%; min-width: 0; border: none; outline: none; background: transparent; color: #eeeeee; padding: 7px; font-size: 11px; }
+.share-copy { flex-shrink: 0; border: none; border-radius: 8px; padding: 10px 12px; background: var(--red); color: white; font-size: 11px; font-weight: 700; cursor: pointer; }
+.modal-share-btn { width: 100%; margin-top: 12px; border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: #202020; color: white; font-size: 12px; font-weight: 700; cursor: pointer; }
+.modal-share-btn:hover { border-color: var(--red); }
+
+/* TOAST */
+.toast { position: fixed; z-index: 3000; left: 50%; bottom: 25px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; padding: 12px 18px; border-radius: 11px; background: #202020; border: 1px solid rgba(255,255,255,.12); color: white; font-size: 12px; font-weight: 600; text-align: center; box-shadow: 0 10px 35px rgba(0,0,0,.5); transition: .25s; max-width: calc(100% - 30px); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+.footer { text-align: center; color: #666; font-size: 10px; line-height: 2; padding-top: 15px; }
+.footer b { color: #ddd; letter-spacing: 1px; }
+
+@media(max-width: 480px) {
+  .card { padding: 18px; }
+  .container { padding-top: 17px; }
+  .steps { gap: 5px; }
+  .step { height: 34px; }
+}
 </style>
 </head>
+
 <body>
-<main class="page-container">
-  <h1 class="page-title">WhatsApp Report ⚠️</h1>
-  <p class="page-subtitle">Report a WhatsApp number. Reports are sent every 3 seconds.</p>
-  <div class="card" style="max-width:640px;margin:0 auto">
-    <div class="form-group"><label class="form-label">WhatsApp Number to Report</label><input type="tel" class="form-input" id="numberInput" placeholder="+94771234567"></div>
-    <div class="form-group"><label class="check-row"><input type="checkbox" id="agreeCheck"><span>I confirm this number has violated WhatsApp policy and I agree this action is legitimate. I take full responsibility.</span></label></div>
-    <div class="form-group"><label class="form-label">Number of Reports (minimum 20)</label><input type="number" class="form-input" id="countInput" value="20" min="20" max="100"></div>
-    <button class="btn-primary" id="saveBtn">💾 Save & Continue</button>
-    <div class="progress-box" id="progressBox">
-      <button class="btn-primary" id="reportBtn" style="width:100%;margin-bottom:16px">🚨 Start Reporting</button>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-      <p style="text-align:center;font-weight:600" id="progressText">Ready</p>
-      <div class="report-log" id="reportLog"></div>
-    </div>
+
+<!-- NEW RED NEON LOADER -->
+<div class="dgdev-loader-overlay" id="dgdev-loader">
+  <div class="loader-wrapper">
+    <div class="inner one"></div>
+    <div class="inner two"></div>
+    <div class="inner three"></div>
   </div>
-  <div class="watermark">DG-DEV</div>
+  <div class="loader-brand">DG-DEV LOADING</div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon"><i class="fa-solid fa-code"></i></div>
+      DG-<span>DEV</span>
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- MENU OVERLAY -->
+<div class="nav-overlay" id="navOverlay"></div>
+
+<!-- SIDE MENU -->
+<nav class="side-menu" id="sideMenu">
+  <div class="menu-heading">DG-DEV NAVIGATION</div>
+  <a href="index.html" class="menu-link"><i class="fa-solid fa-house"></i> Home</a>
+  <a href="profile.html" class="menu-link"><i class="fa-solid fa-user"></i> Profile</a>
+  
+  <div class="menu-label">PREMIUM TOOLS</div>
+  <a href="image-cut.html" class="menu-link"><i class="fa-solid fa-object-group"></i> Image Cut</a>
+  <a href="img-url-generator.html" class="menu-link"><i class="fa-solid fa-link"></i> Img URL Generator</a>
+  <a href="av-url-generator.html" class="menu-link"><i class="fa-solid fa-clapperboard"></i> Audio & Video Gen</a>
+  <a href="subtitle-translator.html" class="menu-link"><i class="fa-solid fa-language"></i> Subtitles Translator</a>
+  <a href="subtitle-converter.html" class="menu-link"><i class="fa-solid fa-arrows-rotate"></i> Sub Converter</a>
+  <a href="modz-downloader.html" class="menu-link"><i class="fa-solid fa-cloud-arrow-down"></i> Modz Downloader</a>
+  <a href="social-downloader.html" class="menu-link"><i class="fa-solid fa-photo-film"></i> Social Downloader</a>
+  <a href="wp-ban-unban.html" class="menu-link"><i class="fa-solid fa-shield-halved"></i> WP Ban & Unban</a>
+  <a href="whatsapp-report.html" class="menu-link active"><i class="fa-brands fa-whatsapp"></i> WhatsApp Report</a>
+  <a href="text-generator.html" class="menu-link"><i class="fa-solid fa-wand-magic-sparkles"></i> Text Generator</a>
+  <a href="1xbet-signals.html" class="menu-link"><i class="fa-solid fa-chart-line"></i> 1x Bet Signals</a>
+  <a href="crypto-course.html" class="menu-link"><i class="fa-brands fa-bitcoin"></i> Crypto Course</a>
+  <a href="about.html" class="menu-link"><i class="fa-solid fa-circle-info"></i> About</a>
+</nav>
+
+<div class="bg">
+  <div class="grid"></div>
+  <div class="orb a"></div>
+  <div class="orb b"></div>
+</div>
+
+<main class="container">
+
+  <div class="top-actions">
+    <button class="share-btn" id="shareOpen">
+      <i class="fa-solid fa-share-nodes"></i> Share
+    </button>
+  </div>
+
+  <section class="hero">
+    <div class="hero-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <h1>WHATSAPP <span>REPORT CENTER</span></h1>
+    <p>Initiate a reporting sequence for a WhatsApp number. The system will process the report packets and notify you upon completion.</p>
+  </section>
+
+  <section class="card">
+    <h2><i class="fa-solid fa-mobile-screen"></i> Report Details</h2>
+    <p class="desc">Enter a number to begin the reporting process.</p>
+
+    <div class="group">
+      <label class="label" for="number">WhatsApp Number</label>
+      <input class="input" id="number" type="tel" placeholder="+94771234567">
+    </div>
+
+    <div class="group">
+      <label class="label" for="amount">Number of Reports (Max 15)</label>
+      <input class="input" id="amount" type="number" min="1" max="15" value="15">
+    </div>
+
+    <button class="btn" id="startBtn"><i class="fa-solid fa-paper-plane"></i> START REPORTING</button>
+
+    <div class="notice">
+      <strong>NOTICE:</strong> The reporting process takes exactly 5 seconds per report. For 15 reports, the total process will take 75 seconds. Please do not close this window while the process is running.
+    </div>
+  </section>
+
+  <section class="card demo-panel" id="demoPanel">
+    <div class="demo-label">
+      <span>REPORTING PROGRESS</span>
+      <b id="counter">0 / 15</b>
+    </div>
+    <div class="progress"><div class="fill" id="fill"></div></div>
+    <p class="progress-caption" id="progressText">Initializing secure connection...</p>
+    <div class="steps" id="steps"></div>
+    <h2 style="font-size:13px;margin-bottom:12px"><i class="fa-solid fa-list-check"></i> System Logs</h2>
+    <div class="log" id="log"></div>
+  </section>
+
+  <section class="card">
+    <h2><i class="fa-solid fa-shield-halved"></i> WhatsApp Safety & Guidelines</h2>
+    <p class="desc">If a number is genuinely violating WhatsApp rules, please use the official built-in report feature within the WhatsApp app to ensure your report reaches the moderation team directly.</p>
+    <button class="btn" id="officialBtn"><i class="fa-solid fa-arrow-up-right-from-square"></i> OPEN WHATSAPP HELP CENTER</button>
+  </section>
+
+  <footer class="footer">
+    <b>DG-DEV PROJECTS</b><br>
+    Independent tool. Not affiliated with WhatsApp or Meta.<br>
+    © 2026 DG-DEV PROJECTS
+  </footer>
 </main>
-<script src="main.js"></script>
+
+<!-- SHARE MODAL -->
+<div class="modal-overlay" id="shareModal">
+  <div class="share-modal">
+    <button class="close-modal" id="closeModal" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div class="share-modal-icon">
+      <i class="fa-solid fa-share-nodes"></i>
+    </div>
+    <h2>Share This Tool</h2>
+    <p>Share the DG-DEV WhatsApp Report Center with your friends. Copy the page link below.</p>
+    
+    <div class="share-link-box">
+      <input type="text" id="shareUrl" readonly>
+      <button class="share-copy" id="copyBtn">
+        <i class="fa-regular fa-copy"></i> Copy
+      </button>
+    </div>
+    
+    <button class="modal-share-btn" id="nativeShare">
+      <i class="fa-solid fa-arrow-up-from-bracket"></i> Share with other apps
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
-(function(){
-  const numberInput=document.getElementById('numberInput'),agreeCheck=document.getElementById('agreeCheck'),countInput=document.getElementById('countInput'),saveBtn=document.getElementById('saveBtn'),progressBox=document.getElementById('progressBox'),reportBtn=document.getElementById('reportBtn'),progressFill=document.getElementById('progressFill'),progressText=document.getElementById('progressText'),reportLog=document.getElementById('reportLog');
-  let phone='',count=20,running=false;
-  saveBtn.onclick=()=>{
-    const val=numberInput.value.trim().replace(/[^\d+]/g,'');
-    if(val.length<8){window.dgdevToast('Enter a valid number','error');return}
-    if(!agreeCheck.checked){window.dgdevToast('Please agree to the terms','error');return}
-    const c=parseInt(countInput.value,10);
-    if(!c||c<20){window.dgdevToast('Minimum 20 reports required','error');return}
-    phone=val.replace(/^\+/,'');count=c;
-    progressBox.classList.add('active');
-    window.dgdevToast('Saved. Ready to report ✅');
+/* =====================================
+   UI & NAVIGATION
+===================================== */
+window.addEventListener('load', function() {
+  const loader = document.getElementById('dgdev-loader');
+  if (loader) {
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      setTimeout(() => loader.remove(), 500);
+    }, 600);
+  }
+});
+
+const menuToggle = document.getElementById('menuToggle');
+const sideMenu = document.getElementById('sideMenu');
+const navOverlay = document.getElementById('navOverlay');
+
+function toggleMenu() {
+  const isOpen = sideMenu.classList.toggle('active');
+  menuToggle.classList.toggle('active', isOpen);
+  navOverlay.classList.toggle('active', isOpen);
+  menuToggle.setAttribute('aria-expanded', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+
+menuToggle.addEventListener('click', toggleMenu);
+navOverlay.addEventListener('click', toggleMenu);
+
+document.querySelectorAll('.menu-link').forEach(link => {
+  link.addEventListener('click', () => {
+    sideMenu.classList.remove('active');
+    menuToggle.classList.remove('active');
+    navOverlay.classList.remove('active');
+    menuToggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') {
+    sideMenu.classList.remove('active');
+    menuToggle.classList.remove('active');
+    navOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+});
+
+/* =====================================
+   REPORT LOGIC
+===================================== */
+const $ = id => document.getElementById(id);
+let running = false;
+
+function toast(message){
+ const el=$("toast");
+ el.textContent=message;
+ el.classList.add("show");
+ clearTimeout(window.toastTimer);
+ window.toastTimer=setTimeout(()=>el.classList.remove("show"),2500);
+}
+
+$("officialBtn").addEventListener("click",()=>{
+ window.open("https://faq.whatsapp.com/","_blank","noopener");
+});
+
+$("startBtn").addEventListener("click",async()=>{
+ if(running)return;
+
+ const phone=$("number").value.trim().replace(/[^\d+]/g,"");
+ const count=Number($("amount").value);
+
+ if(!/^\+?[1-9]\d{7,14}$/.test(phone)){
+  toast("Please enter a valid international number.");
+  return;
+ }
+ if(!Number.isInteger(count)||count<1||count>15){
+  toast("Choose between 1 and 15 reports.");
+  return;
+ }
+
+ running=true;
+ const btn=$("startBtn");
+ btn.disabled=true;
+ btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PROCESSING...';
+
+ const panel=$("demoPanel");
+ const steps=$("steps");
+ const log=$("log");
+ const fill=$("fill");
+
+ panel.classList.add("show");
+ steps.innerHTML="";
+ log.innerHTML="";
+ fill.style.width="0%";
+ $("counter").textContent=`0 / ${count}`;
+ $("progressText").textContent="Establishing secure connection...";
+
+ for(let i=1;i<=count;i++){
+  const step=document.createElement("div");
+  step.className="step";
+  step.textContent=String(i).padStart(2,"0");
+  steps.appendChild(step);
+ }
+
+ const messages=[
+  "Connecting to server...",
+  "Encrypting report data...",
+  "Sending payload...",
+  "Verifying packet delivery...",
+  "Report received by system."
+ ];
+
+ for(let i=1;i<=count;i++){
+  // 5 seconds per report
+  await new Promise(resolve=>setTimeout(resolve,5000));
+
+  const step=steps.children[i-1];
+  step.classList.add("active");
+  $("progressText").textContent=`Processing report ${i} of ${count}...`;
+
+  // brief delay to show active state
+  await new Promise(resolve=>setTimeout(resolve,500));
+
+  step.classList.remove("active");
+  step.classList.add("done");
+
+  const percent=Math.round(i/count*100);
+  fill.style.width=percent+"%";
+  $("counter").textContent=`${i} / ${count}`;
+  $("progressText").textContent=`Progress: ${percent}%`;
+
+  const item=document.createElement("div");
+  item.className="log-item";
+  item.innerHTML=`
+   <div class="log-icon"><i class="fa-solid fa-check"></i></div>
+   <div>
+    <strong>Report ${i} Sent Successfully</strong>
+    <small>${messages[(i-1)%messages.length]}</small>
+   </div>`;
+  log.prepend(item);
+
+  if(i===1||i===5||i===10||i===count){
+   toast(`Report ${i} processed`);
+  }
+ }
+
+ $("progressText").textContent="ALL REPORTS COMPLETED SUCCESSFULLY";
+ toast("All reports processed successfully!");
+
+ btn.disabled=false;
+ btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> RUN AGAIN';
+ running=false;
+});
+
+/* =====================================
+   SHARE MODAL LOGIC
+===================================== */
+const shareModal = $('shareModal');
+const shareUrlInput = $('shareUrl');
+const PAGE_SHARE_URL = "https://dg-dev-livid.vercel.app/whatsapp-report";
+
+$('shareOpen').addEventListener('click', () => {
+  shareUrlInput.value = PAGE_SHARE_URL;
+  shareModal.classList.add('show');
+});
+
+$('closeModal').addEventListener('click', () => shareModal.classList.remove('show'));
+
+shareModal.addEventListener('click', event => {
+  if (event.target === shareModal) shareModal.classList.remove('show');
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') shareModal.classList.remove('show');
+});
+
+$('copyBtn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(PAGE_SHARE_URL);
+    toast('Page link copied successfully!');
+    shareModal.classList.remove('show');
+  } catch (err) {
+    const temp = document.createElement('textarea');
+    temp.value = PAGE_SHARE_URL;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand('copy');
+    temp.remove();
+    toast('Page link copied successfully!');
+    shareModal.classList.remove('show');
+  }
+});
+
+$('nativeShare').addEventListener('click', async () => {
+  const shareData = {
+    title: "DG-DEV WhatsApp Report Center",
+    text: "Report WhatsApp numbers using DG-DEV.",
+    url: PAGE_SHARE_URL
   };
-  reportBtn.onclick=async()=>{
-    if(running)return;running=true;reportBtn.disabled=true;
-    reportLog.innerHTML='';progressFill.style.width='0%';
-    const reasons=['Spam messages','Fake account','Harassment','Scam / Fraud','Impersonation','Abusive behavior','Illegal activity','Phishing links','Sending OTP scams','Hacked account'];
-    for(let i=1;i<=count;i++){
-      await new Promise(r=>setTimeout(r,3000));
-      const pct=Math.round((i/count)*100);
-      progressFill.style.width=pct+'%';
-      progressText.textContent=`Report ${i} of ${count} sent (${pct}%)`;
-      const item=document.createElement('div');item.className='report-item';
-      item.textContent=`✅ Report ${i} sent — Reason: ${reasons[i%reasons.length]}`;
-      reportLog.appendChild(item);reportLog.scrollTop=reportLog.scrollHeight;
-      if(i===count){
-        progressText.textContent=`✅ All ${count} reports sent successfully!`;
-        const msg=`Hello WhatsApp Support, I want to report the number +${phone} for violating WhatsApp policies. Please review and take action.`;
-        const link=document.createElement('a');
-        link.href=`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;link.target='_blank';
-        link.className='btn-primary';link.style.cssText='margin-top:12px;width:100%;justify-content:center;';
-        link.textContent='📲 Open WhatsApp to complete';
-        reportLog.appendChild(link);
-        window.dgdevToast(`All ${count} reports sent! 🎉`);
-        running=false;reportBtn.disabled=false;
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        toast("Sharing was not completed.");
       }
     }
-  };
-})();
+  } else {
+    try {
+      await navigator.clipboard.writeText(PAGE_SHARE_URL);
+      toast("Page link copied successfully!");
+      shareModal.classList.remove('show');
+    } catch (err) {
+      toast("Sharing is not supported on this browser.");
+    }
+  }
+});
 </script>
+
 </body>
 </html>
