@@ -1,106 +1,949 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080808">
 <title>Subtitle Converter - DG-DEV PROJECTS</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<script>(function(){const t=localStorage.getItem('dgdev-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Maname&family=Abhaya+Libre:wght@400;500;600;700;800&family=Noto+Serif+Sinhala:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
 <style>
-.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:40px 20px;text-align:center;cursor:pointer;transition:all .3s;background:var(--card)}
-.upload-zone:hover,.upload-zone.dragover{border-color:var(--primary);background:var(--bg-2)}
-.convert-types{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:20px 0}
-.conv-btn{padding:14px;background:var(--card);border:2px solid var(--border);border-radius:10px;cursor:pointer;font-weight:700;font-size:.85rem;transition:all .2s;font-family:inherit;color:var(--text)}
-.conv-btn.active{background:var(--accent-grad);color:#fff;border-color:transparent}
-.conv-btn:hover{border-color:var(--primary)}
-.files-list{margin-top:16px;display:flex;flex-direction:column;gap:8px}
-.file-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;font-size:.88rem}
-.color-row{display:flex;align-items:center;gap:10px}
-.color-row input[type=color]{width:50px;height:36px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:transparent}
+:root {
+  --bg: #080808;
+  --panel: #111319;
+  --panel2: #171a22;
+  --line: #292d38;
+  --text: #f5f6fa;
+  --muted: #969baa;
+  --red: #ff304b;
+  --red2: #c90d2d;
+  --white: #fff;
+  --green: #42d392;
+  --shadow: 0 22px 70px rgba(0,0,0,0.5);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: 'Inter', 'Noto Sans Sinhala', sans-serif;
+  background: var(--bg);
+  overflow-x: hidden;
+}
+
+body:before, body:after {
+  content: ""; position: fixed; z-index: -2; pointer-events: none; border-radius: 50%;
+  filter: blur(90px); opacity: .22; animation: float 12s ease-in-out infinite alternate;
+}
+body:before { width: 420px; height: 420px; background: #a90025; top: -170px; left: -140px; }
+body:after { width: 450px; height: 450px; background: #7b1025; right: -180px; bottom: -190px; animation-delay: -5s; }
+
+.bg-grid {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, #000, transparent 88%);
+}
+
+@keyframes float { to { transform: translate(70px, 55px) scale(1.16); } }
+@keyframes pulse { 50% { box-shadow: 0 0 0 9px rgba(255, 48, 75, 0.07), 0 0 35px rgba(255, 48, 75, 0.2); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+/* =====================================
+   HEADER & NAVIGATION
+===================================== */
+.header {
+  width: 100%; height: 75px; position: sticky; top: 0; z-index: 1000;
+  background: rgba(5,5,5,.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.header-inner {
+  max-width: 1250px; height: 100%; margin: auto; padding: 0 22px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  display: flex; align-items: center; gap: 12px; font-family: 'Space Grotesk', sans-serif;
+  font-size: 21px; font-weight: 800; letter-spacing: 1px; text-decoration: none; color: white;
+}
+.logo span { color: #ff1744; }
+.logo-icon {
+  width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px;
+  color: white; background: linear-gradient(145deg, #ff1744, #760015); box-shadow: 0 0 20px rgba(255,23,68,.35);
+}
+.menu-toggle {
+  width: 46px; height: 46px; border-radius: 13px; border: 1px solid rgba(255,23,68,.5);
+  background: rgba(255,23,68,.08); display: flex; flex-direction: column; justify-content: center;
+  align-items: center; gap: 6px; transition: .3s; z-index: 1002;
+}
+.menu-toggle:hover { background: #ff1744; box-shadow: 0 0 20px rgba(255,23,68,.5); }
+.menu-toggle span { width: 21px; height: 2px; background: white; border-radius: 5px; transition: .3s; }
+.menu-toggle.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.menu-toggle.active span:nth-child(2) { opacity: 0; transform: translateX(-10px); }
+.menu-toggle.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+.nav-overlay {
+  position: fixed; inset: 0; z-index: 998; background: rgba(0,0,0,.7);
+  opacity: 0; visibility: hidden; transition: .3s;
+}
+.nav-overlay.active { opacity: 1; visibility: visible; }
+.side-menu {
+  position: fixed; z-index: 1001; top: 0; right: -360px; width: 320px; max-width: 85%;
+  height: 100vh; padding: 100px 22px 30px; background: rgba(10,10,10,.97);
+  backdrop-filter: blur(20px); border-left: 1px solid rgba(255,23,68,.25);
+  transition: .4s cubic-bezier(.77,0,.18,1); overflow-y: auto;
+}
+.side-menu.active { right: 0; }
+.menu-heading { color: #ff1744; font-family: 'Space Grotesk', sans-serif; font-size: 12px; letter-spacing: 3px; margin-bottom: 20px; }
+.menu-link {
+  display: flex; align-items: center; gap: 15px; padding: 15px; margin-bottom: 9px;
+  background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px; color: #ddd; font-size: 14px; transition: .3s; text-decoration: none;
+}
+.menu-link i { width: 22px; text-align: center; color: #ff1744; font-size: 16px; }
+.menu-link:hover { background: rgba(255,23,68,.12); border-color: #ff1744; transform: translateX(-5px); color: white; }
+.menu-link.active { background: rgba(255,23,68,.15); border-color: #ff1744; color: #fff; }
+.menu-label { padding: 18px 5px 8px; color: #ff536f; font-family: 'Space Grotesk', sans-serif; font-size: 11px; letter-spacing: 2px; }
+
+/* =====================================
+   NEW RED NEON LOADER
+===================================== */
+.dgdev-loader-overlay {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 25px; z-index: 99999;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.dgdev-loader-overlay.hidden { opacity: 0; visibility: hidden; }
+.loader-wrapper { position: relative; width: 100px; height: 100px; }
+.loader-wrapper .inner {
+  position: absolute; box-sizing: border-box; width: 100%; height: 100%;
+  border-radius: 50%; border: 4px solid transparent;
+}
+.loader-wrapper .inner.one {
+  border-top-color: #ff1744; border-right-color: #ff1744;
+  animation: rotate-one 1s linear infinite;
+}
+.loader-wrapper .inner.two {
+  border-bottom-color: #ff003c; border-left-color: #ff003c;
+  animation: rotate-two 1s linear infinite;
+}
+.loader-wrapper .inner.three {
+  border-top-color: #ff526d; border-right-color: #ff526d;
+  animation: rotate-three 1s linear infinite;
+}
+@keyframes rotate-one { 0% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg); } 100% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg); } }
+@keyframes rotate-two { 0% { transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg); } 100% { transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg); } }
+@keyframes rotate-three { 0% { transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg); } 100% { transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg); } }
+
+.loader-brand {
+  font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 3px;
+  color: #ff1744; animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* WRAP & HERO */
+.wrap { width: min(100% - 32px, 1060px); margin: auto; padding-top: 20px; }
+.hero { text-align: center; padding: 54px 10px 30px; animation: fadeUp .7s both; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px;
+  border: 1px solid rgba(255, 48, 75, 0.3); background: rgba(255, 48, 75, 0.07);
+  border-radius: 99px; color: #ff8494; font-size: 11px; font-weight: 800; letter-spacing: 1.7px;
+}
+.eyebrow i { width: 7px; height: 7px; background: #ff304b; border-radius: 50%; animation: pulse 1.8s infinite; }
+h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.08; margin: 19px 0 12px; font-weight: 900; letter-spacing: -2px; }
+h1 span { background: linear-gradient(90deg, #fff 5%, #ff687d 58%, #ff304b); background-clip: text; color: transparent; }
+.hero p { max-width: 610px; margin: 0 auto; color: var(--muted); font-size: 14px; line-height: 1.8; }
+
+.main-card {
+  background: linear-gradient(145deg, rgba(21, 24, 33, 0.95), rgba(14, 16, 22, 0.95));
+  border: 1px solid rgba(255,255,255,.08); border-radius: 23px;
+  padding: clamp(17px, 3.5vw, 30px); box-shadow: var(--shadow);
+  animation: fadeUp .8s .1s both; backdrop-filter: blur(18px);
+}
+.section-title { font-size: 14px; font-weight: 800; margin: 0 0 15px; display: flex; align-items: center; gap: 9px; }
+.section-title .num { display: grid; place-items: center; width: 25px; height: 25px; border-radius: 8px; background: rgba(255, 48, 75, 0.15); color: #ff7284; font-size: 11px; }
+
+.upload-zone {
+  border: 1.5px dashed #4a4f5d; border-radius: 18px; min-height: 190px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 22px 15px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 48, 75, 0.07), transparent 65%), rgba(255,255,255,.02);
+  cursor: pointer; transition: .25s;
+}
+.upload-zone:hover, .upload-zone.drag { border-color: #ff304b; background-color: rgba(255, 48, 75, 0.05); }
+.upload-icon {
+  width: 53px; height: 53px; border-radius: 17px; display: grid; place-items: center;
+  background: linear-gradient(145deg, #ff304b, #a90025); font-size: 24px;
+  box-shadow: 0 8px 25px rgba(255, 48, 75, 0.2); margin-bottom: 13px;
+}
+.upload-zone strong { font-size: 15px; }
+.upload-zone p { margin: 7px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.upload-zone p b { color: #ff7284; }
+
+#fileInput { display: none; }
+
+/* =====================================
+   BEAUTIFUL FILE LIST
+===================================== */
+.file-list { display: grid; gap: 8px; margin-top: 15px; }
+.file-item { 
+  display: flex; align-items: center; justify-content: space-between; 
+  background: rgba(255,255,255,0.03); border: 1px solid var(--line); 
+  padding: 12px 16px; border-radius: 12px; font-size: 13px; 
+  transition: all 0.2s;
+}
+.file-item:hover { border-color: rgba(255, 48, 75, 0.4); background: rgba(255, 48, 75, 0.05); }
+.file-name-wrapper { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+.file-name-wrapper i { color: var(--red); font-size: 18px; }
+.file-name-wrapper span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #eee; font-weight: 500; }
+.file-size { color: var(--muted); font-size: 11px; white-space: nowrap; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; }
+
+.settings { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin-top: 23px; }
+.field label { display: block; color: #b8bdc9; font-size: 11px; font-weight: 700; margin: 0 0 8px; }
+.field select, .field input { width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 12px; background: #0c0e14; color: var(--text); padding: 0 13px; font: 500 13px 'Inter', sans-serif; outline: none; }
+.field select:focus, .field input:focus { border-color: #ff304b; box-shadow: 0 0 0 3px rgba(255, 48, 75, 0.1); }
+.hint { font-size: 10px; color: var(--muted); line-height: 1.6; margin-top: 7px; }
+
+.action-row { display: flex; gap: 10px; margin-top: 21px; }
+.primary {
+  flex: 1; min-height: 49px; border: 0; border-radius: 13px; color: white;
+  background: linear-gradient(100deg, #ff4059, #bd092c); font: 800 13px 'Inter', sans-serif;
+  letter-spacing: .2px; cursor: pointer; box-shadow: 0 9px 25px rgba(210, 13, 48, 0.25); transition: .2s;
+}
+.primary:hover { transform: translateY(-2px); filter: brightness(1.08); }
+.primary:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.secondary { min-height: 49px; border: 1px solid var(--line); background: rgba(255,255,255,.03); color: var(--text); border-radius: 13px; padding: 0 17px; font: 700 12px 'Inter', sans-serif; cursor: pointer; }
+
+.progress-wrap { display: none; margin-top: 19px; }
+.progress-head { display: flex; justify-content: space-between; color: #c8cbd4; font-size: 11px; margin-bottom: 8px; }
+.progress { height: 7px; background: #292d38; border-radius: 99px; overflow: hidden; }
+.progress > div { height: 100%; width: 0; background: linear-gradient(90deg, #ff304b, #ff8a9a); border-radius: 99px; transition: width .25s; }
+.status { display: none; margin-top: 13px; padding: 12px 13px; border-radius: 11px; background: rgba(66, 211, 146, 0.07); border: 1px solid rgba(66, 211, 146, 0.25); color: #7ee6b7; font-size: 12px; line-height: 1.6; }
+.status.error { background: rgba(255, 48, 75, 0.07); border-color: rgba(255, 48, 75, 0.3); color: #ff9aa8; }
+
+.result { display: none; margin-top: 20px; padding: 16px; border: 1px solid rgba(66, 211, 146, 0.3); background: rgba(66, 211, 146, 0.05); border-radius: 15px; }
+.result h3 { font-size: 14px; margin: 0 0 6px; }
+.result p { font-size: 11px; color: var(--muted); margin: 0 0 13px; line-height: 1.6; }
+.download-btn { width: 100%; height: 45px; border: 0; border-radius: 11px; background: linear-gradient(90deg, #178f60, #28bd83); color: #fff; font-weight: 800; cursor: pointer; }
+
+.info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0 50px; }
+.info { padding: 16px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03); border-radius: 15px; }
+.info b { display: block; font-size: 12px; margin: 8px 0 5px; }
+.info p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+.info .emoji { font-size: 19px; }
+footer { text-align: center; padding: 0 0 25px; color: #727887; font-size: 10px; letter-spacing: .4px; }
+.footer-brand { color: #ff6478; font-weight: 900; }
+
+/* =====================================
+   SHARE MODAL
+===================================== */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 2000; display: none; align-items: center;
+  justify-content: center; padding: 20px; background: rgba(0,0,0,.78);
+  backdrop-filter: blur(9px);
+}
+.modal-overlay.show { display: flex; animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.share-modal {
+  width: 100%; max-width: 390px; padding: 25px; border-radius: 20px;
+  background: linear-gradient(145deg, #1b1b1b, #0d0d0d);
+  border: 1px solid rgba(255,50,50,.35);
+  box-shadow: 0 20px 80px rgba(0,0,0,.65), 0 0 35px rgba(255,0,0,.08);
+  position: relative; animation: modalUp .3s ease;
+}
+@keyframes modalUp { from { opacity: 0; transform: translateY(20px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.close-modal {
+  position: absolute; right: 15px; top: 15px; width: 33px; height: 33px;
+  border-radius: 9px; border: 1px solid var(--line); background: #222; color: white; cursor: pointer;
+}
+.share-modal-icon {
+  width: 57px; height: 57px; border-radius: 17px; display: grid; place-items: center;
+  background: rgba(255,35,35,.14); color: #ff1744; font-size: 24px; margin-bottom: 17px;
+}
+.share-modal h2 { font-family: 'Space Grotesk', sans-serif; font-size: 21px; margin-bottom: 8px; }
+.share-modal p { color: var(--muted); font-size: 12px; line-height: 1.7; margin-bottom: 18px; }
+.share-link-box { display: flex; gap: 7px; padding: 7px; border-radius: 11px; background: #080808; border: 1px solid var(--line); }
+.share-link-box input { width: 100%; min-width: 0; border: none; outline: none; background: transparent; color: #eeeeee; padding: 7px; font-size: 11px; }
+.share-copy { flex-shrink: 0; border: none; border-radius: 8px; padding: 10px 12px; background: #ff1744; color: white; font-size: 11px; font-weight: 700; cursor: pointer; }
+.modal-share-btn { width: 100%; margin-top: 12px; border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: #202020; color: white; font-size: 12px; font-weight: 700; cursor: pointer; }
+.modal-share-btn:hover { border-color: #ff1744; }
+
+/* TOAST */
+.toast {
+  position: fixed; z-index: 3000; left: 50%; bottom: 25px; transform: translate(-50%, 20px);
+  opacity: 0; pointer-events: none; padding: 12px 18px; border-radius: 11px;
+  background: #202020; border: 1px solid rgba(255,255,255,.12); color: white;
+  font-size: 12px; font-weight: 600; text-align: center; box-shadow: 0 10px 35px rgba(0,0,0,.5);
+  transition: .25s; max-width: calc(100% - 30px);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media(max-width: 600px) {
+  .wrap { width: min(100% - 22px, 1060px); }
+  .hero { padding: 39px 4px 23px; }
+  h1 { letter-spacing: -1.4px; }
+  .hero p { font-size: 12px; }
+  .main-card { border-radius: 18px; padding: 15px; }
+  .upload-zone { min-height: 170px; }
+  .settings { grid-template-columns: 1fr; gap: 12px; }
+  .action-row { flex-direction: column; }
+  .secondary { width: 100%; }
+  .info-grid { grid-template-columns: 1fr; gap: 9px; margin-bottom: 35px; }
+  .info { display: flex; gap: 12px; align-items: center; }
+  .info b { margin: 0 0 4px; }
+  .info .emoji { font-size: 23px; }
+}
 </style>
 </head>
 <body>
-<main class="page-container">
-  <h1 class="page-title">Subtitle Converter 🔄</h1>
-  <p class="page-subtitle">Convert SRT ↔ VTT ↔ ASS with DG-DEV watermark on filenames.</p>
-  <div class="upload-zone" id="uploadZone">
-    <div style="font-size:2.5rem">📁</div>
-    <p><strong>Click or drag & drop</strong> subtitle files</p>
-    <p style="font-size:.85rem;color:var(--text-muted)">Supports .srt, .vtt, .ass · Multiple files allowed</p>
-    <input type="file" id="fileInput" multiple accept=".srt,.vtt,.ass" style="display:none">
+
+<!-- NEW RED NEON LOADER -->
+<div class="dgdev-loader-overlay" id="dgdev-loader">
+  <div class="loader-wrapper">
+    <div class="inner one"></div>
+    <div class="inner two"></div>
+    <div class="inner three"></div>
   </div>
-  <div class="files-list" id="filesList"></div>
-  <div class="card" style="margin-top:24px">
-    <h3 style="margin-bottom:12px">Conversion Type</h3>
-    <div class="convert-types">
-      <button class="conv-btn" data-type="srt2ass">SRT → ASS</button>
-      <button class="conv-btn" data-type="ass2srt">ASS → SRT</button>
-      <button class="conv-btn" data-type="srt2vtt">SRT → VTT</button>
-      <button class="conv-btn" data-type="vtt2srt">VTT → SRT</button>
-      <button class="conv-btn" data-type="ass2vtt">ASS → VTT</button>
-      <button class="conv-btn" data-type="vtt2ass">VTT → ASS</button>
-    </div>
-    <div class="form-group color-row">
-      <label class="form-label" style="margin:0">Subtitle Color (ASS only):</label>
-      <input type="color" id="colorPicker" value="#ffffff">
-    </div>
-    <button class="btn-primary" id="convertBtn" style="width:100%">🔄 Convert & Download All</button>
+  <div class="loader-brand">DG-DEV LOADING</div>
+</div>
+
+<!-- HEADER (From Home Page) -->
+<header class="header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon"><i class="fa-solid fa-code"></i></div>
+      DG-<span>DEV</span>
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </div>
-</main>
-<script src="main.js"></script>
+</header>
+
+<!-- MENU OVERLAY -->
+<div class="nav-overlay" id="navOverlay"></div>
+
+<!-- SIDE MENU -->
+<nav class="side-menu" id="sideMenu">
+  <div class="menu-heading">DG-DEV NAVIGATION</div>
+  <a href="index.html" class="menu-link"><i class="fa-solid fa-house"></i> Home</a>
+  <a href="profile.html" class="menu-link"><i class="fa-solid fa-user"></i> Profile</a>
+  
+  <div class="menu-label">PREMIUM TOOLS</div>
+  <a href="image-cut.html" class="menu-link"><i class="fa-solid fa-object-group"></i> Image Cut</a>
+  <a href="img-url-generator.html" class="menu-link"><i class="fa-solid fa-link"></i> Img URL Generator</a>
+  <a href="av-url-generator.html" class="menu-link"><i class="fa-solid fa-clapperboard"></i> Audio & Video Gen</a>
+  <a href="subtitle-translator.html" class="menu-link"><i class="fa-solid fa-language"></i> Subtitles Translator</a>
+  <a href="subtitle-converter.html" class="menu-link active"><i class="fa-solid fa-arrows-rotate"></i> Sub Converter</a>
+  <a href="modz-downloader.html" class="menu-link"><i class="fa-solid fa-cloud-arrow-down"></i> Modz Downloader</a>
+  <a href="social-downloader.html" class="menu-link"><i class="fa-solid fa-photo-film"></i> Social Downloader</a>
+  <a href="wp-ban-unban.html" class="menu-link"><i class="fa-solid fa-shield-halved"></i> WP Ban & Unban</a>
+  <a href="whatsapp-report.html" class="menu-link"><i class="fa-brands fa-whatsapp"></i> WhatsApp Report</a>
+  <a href="text-generator.html" class="menu-link"><i class="fa-solid fa-wand-magic-sparkles"></i> Text Generator</a>
+  <a href="1xbet-signals.html" class="menu-link"><i class="fa-solid fa-chart-line"></i> 1x Bet Signals</a>
+  <a href="crypto-course.html" class="menu-link"><i class="fa-brands fa-bitcoin"></i> Crypto Course</a>
+  <a href="about.html" class="menu-link"><i class="fa-solid fa-circle-info"></i> About</a>
+</nav>
+
+<!-- BACKGROUND -->
+<div class="bg-grid"></div>
+
+<div class="wrap">
+  <!-- TOP BAR WITH SHARE BUTTON -->
+  <div style="display:flex; justify-content:flex-end; padding-top: 20px; animation: fadeUp .5s both;">
+    <button class="share-btn" id="shareOpen" style="border: 1px solid var(--line); background: rgba(255,255,255,0.05); color: white; padding: 11px 18px; border-radius: 11px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px; transition: .25s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--line)'">
+      <i class="fa-solid fa-share-nodes"></i> Share
+    </button>
+  </div>
+
+  <section class="hero" style="padding-top: 20px;">
+    <div class="eyebrow"><i></i> MULTI-FORMAT SUBTITLE CONVERTER</div>
+    <h1>Convert subtitles<br><span>perfectly.</span></h1>
+    <p>Convert your subtitle files between SRT, VTT, ASS, and SSA formats while keeping the original timing and applying custom styles.</p>
+  </section>
+
+  <main class="main-card">
+    <h2 class="section-title"><span class="num">01</span> Upload subtitle files</h2>
+    <label class="upload-zone" id="dropZone" for="fileInput">
+      <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+      <strong>Drop your subtitle files here</strong>
+      <p>or <b>browse files</b> from your device<br>Supports SRT, VTT, ASS, SSA and ZIP archives</p>
+    </label>
+    <input id="fileInput" type="file" multiple accept=".srt,.vtt,.ass,.ssa,.zip">
+    <div class="file-list" id="fileList"></div>
+
+    <!-- Conversion Settings -->
+    <div class="settings">
+      <div class="field">
+        <label for="convertType">CONVERSION TYPE</label>
+        <select id="convertType" onchange="updateConverterAccept()">
+          <option value="srt_to_srt">SRT → SRT (Restyle existing)</option>
+          <option value="vtt_to_srt">VTT → SRT (WebVTT to SubRip)</option>
+          <option value="vtt_to_ass">VTT → ASS (WebVTT to Advanced SubStation)</option>
+          <option value="srt_to_ass">SRT → ASS (SubRip to Advanced SubStation)</option>
+          <option value="ass_to_srt">ASS → SRT (Advanced SubStation to SubRip)</option>
+        </select>
+        <div class="hint">Choose which format you want to convert from and to.</div>
+      </div>
+      <div class="field">
+        <label for="zipName">CUSTOM ZIP NAME</label>
+        <input type="text" id="zipName" placeholder="e.g. My_Converted_Subs" value="DG-DEV_Converted_Subtitles">
+        <div class="hint">Name of the downloaded ZIP file.</div>
+      </div>
+    </div>
+
+    <!-- Font Settings -->
+    <div class="settings" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 13px;">
+      <div class="field">
+        <label for="fontName">FONT FAMILY</label>
+        <select id="fontName">
+          <optgroup label="Sinhala Fonts">
+            <option value="Noto Sans Sinhala">Noto Sans Sinhala</option>
+            <option value="Maname">Maname</option>
+            <option value="Abhaya Libre">Abhaya Libre</option>
+            <option value="Noto Serif Sinhala">Noto Serif Sinhala</option>
+          </optgroup>
+          <optgroup label="English Fonts">
+            <option value="Arial">Arial</option>
+            <option value="Inter">Inter</option>
+            <option value="Verdana">Verdana</option>
+            <option value="Tahoma">Tahoma</option>
+          </optgroup>
+        </select>
+        <div class="hint">Font style for converted subs.</div>
+      </div>
+      <div class="field">
+        <label for="fontSize">FONT SIZE</label>
+        <select id="fontSize">
+          <option value="14">14px</option>
+          <option value="16">16px</option>
+          <option value="18">18px</option>
+          <option value="20" selected>20px</option>
+          <option value="22">22px</option>
+          <option value="24">24px</option>
+          <option value="28">28px</option>
+          <option value="32">32px</option>
+        </select>
+        <div class="hint">Size of the text.</div>
+      </div>
+      <div class="field">
+        <label for="fontColor">FONT COLOR</label>
+        <input type="color" id="fontColor" value="#ffffff" style="padding: 5px;">
+        <div class="hint">Color of the text.</div>
+      </div>
+    </div>
+
+    <div class="action-row"><button class="primary" id="convertBtn" disabled>✦ Convert subtitles</button><button class="secondary" id="clearBtn">Clear files</button></div>
+    <div class="progress-wrap" id="progressWrap"><div class="progress-head"><span id="progressLabel">Preparing conversion…</span><b id="progressPct">0%</b></div><div class="progress"><div id="progressBar"></div></div></div>
+    <div class="status" id="status"></div>
+    <div class="result" id="result"><h3>✓ Conversion completed</h3><p id="resultText">Your converted subtitles are ready.</p><button class="download-btn" id="downloadBtn">↓ Download converted files</button></div>
+  </main>
+
+  <section class="info-grid">
+    <div class="info"><div class="emoji">🔄</div><div><b>Format Conversion</b><p>Convert between SRT, VTT, ASS, and SSA formats smoothly.</p></div></div>
+    <div class="info"><div class="emoji">🎨</div><div><b>Custom Styling</b><p>Apply custom fonts, sizes, and colors directly to your subtitles.</p></div></div>
+    <div class="info"><div class="emoji">📦</div><div><b>Batch & ZIP Support</b><p>Upload several files or a ZIP and download them together.</p></div></div>
+  </section>
+  <footer>POWERED BY <span class="footer-brand">DG-DEV PROJECTS</span> · SUBTITLES MADE SIMPLE</footer>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="modal-overlay" id="shareModal">
+  <div class="share-modal">
+    <button class="close-modal" id="closeModal" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div class="share-modal-icon">
+      <i class="fa-solid fa-share-nodes"></i>
+    </div>
+    <h2>Share This Tool</h2>
+    <p>Share the DG-DEV Subtitle Converter with your friends. Copy the page link below.</p>
+    
+    <div class="share-link-box">
+      <input type="text" id="shareUrl" readonly>
+      <button class="share-copy" id="copyBtn">
+        <i class="fa-regular fa-copy"></i> Copy
+      </button>
+    </div>
+    
+    <button class="modal-share-btn" id="nativeShare">
+      <i class="fa-solid fa-arrow-up-from-bracket"></i> Share with other apps
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-(function(){
-  const zone=document.getElementById('uploadZone'),input=document.getElementById('fileInput'),filesList=document.getElementById('filesList'),colorPicker=document.getElementById('colorPicker'),convertBtn=document.getElementById('convertBtn');
-  let files=[],convType=null;
-  zone.onclick=()=>input.click();
-  zone.ondragover=e=>{e.preventDefault();zone.classList.add('dragover')};
-  zone.ondragleave=()=>zone.classList.remove('dragover');
-  zone.ondrop=e=>{e.preventDefault();zone.classList.remove('dragover');addFiles([...e.dataTransfer.files])};
-  input.onchange=e=>addFiles([...e.target.files]);
-  document.querySelectorAll('.conv-btn').forEach(btn=>btn.onclick=()=>{
-    document.querySelectorAll('.conv-btn').forEach(x=>x.classList.remove('active'));
-    btn.classList.add('active');convType=btn.dataset.type;
+/* =====================================
+   UI & NAVIGATION
+===================================== */
+window.addEventListener('load', function() {
+  const loader = document.getElementById('dgdev-loader');
+  if (loader) {
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      setTimeout(() => loader.remove(), 500);
+    }, 600);
+  }
+});
+
+const menuToggle = document.getElementById('menuToggle');
+const sideMenu = document.getElementById('sideMenu');
+const navOverlay = document.getElementById('navOverlay');
+
+function toggleMenu() {
+  const isOpen = sideMenu.classList.toggle('active');
+  menuToggle.classList.toggle('active', isOpen);
+  navOverlay.classList.toggle('active', isOpen);
+  menuToggle.setAttribute('aria-expanded', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+
+menuToggle.addEventListener('click', toggleMenu);
+navOverlay.addEventListener('click', toggleMenu);
+
+document.querySelectorAll('.menu-link').forEach(link => {
+  link.addEventListener('click', () => {
+    sideMenu.classList.remove('active');
+    menuToggle.classList.remove('active');
+    navOverlay.classList.remove('active');
+    menuToggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
   });
-  function addFiles(nf){
-    nf.forEach(f=>{const ext=f.name.split('.').pop().toLowerCase();if(['srt','vtt','ass'].includes(ext))files.push({file:f,name:f.name,ext})});
-    renderFiles();
+});
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') {
+    sideMenu.classList.remove('active');
+    menuToggle.classList.remove('active');
+    navOverlay.classList.remove('active');
+    document.body.style.overflow = '';
   }
-  function renderFiles(){
-    filesList.innerHTML=files.map((f,i)=>`<div class="file-item"><span>📄 ${f.name} <small style="color:var(--text-muted)">(${f.ext.toUpperCase()})</small></span><button class="btn-secondary" style="padding:4px 10px;font-size:.8rem" data-remove="${i}">Remove</button></div>`).join('');
-    filesList.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{files.splice(+b.dataset.remove,1);renderFiles()});
+});
+
+/* =====================================
+   CONVERTER LOGIC
+===================================== */
+const $ = id => document.getElementById(id);
+let selectedFiles = [];
+let outputFiles = [];
+let busy = false;
+let toastTimer;
+
+function showToast(message, error = false) {
+  const toast = $('toast');
+  toast.textContent = message;
+  toast.style.borderLeft = error ? '4px solid #ef4444' : '4px solid #22c55e';
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+function showStatus(message, error=false){
+  const el=$('status'); el.textContent=message; el.className='status'+(error?' error':''); el.style.display='block';
+}
+function hideStatus(){ $('status').style.display='none'; }
+
+/* NEW BEAUTIFUL FILE LIST UI */
+function updateFileList(){
+  $('fileList').innerHTML='';
+  selectedFiles.forEach((f)=>{
+    const row=document.createElement('div'); 
+    row.className='file-item';
+    
+    const nameWrap = document.createElement('div');
+    nameWrap.className = 'file-name-wrapper';
+    nameWrap.innerHTML = `<i class="fa-solid fa-file-lines"></i> <span>${f.name}</span>`;
+    
+    const size=document.createElement('small'); 
+    size.className = 'file-size';
+    size.textContent=(f.size/1024).toFixed(1)+' KB';
+    
+    row.append(nameWrap,size); 
+    $('fileList').append(row);
+  });
+  $('convertBtn').disabled=!selectedFiles.length||busy;
+}
+
+function addFiles(files){
+  const allowed=['srt','vtt','ass','ssa','zip'];
+  for(const file of files){
+    const ext=file.name.split('.').pop().toLowerCase();
+    if(!allowed.includes(ext)){showToast('Unsupported file: '+file.name,true);continue;}
+    if(!selectedFiles.some(x=>x.name===file.name&&x.size===file.size)) selectedFiles.push(file);
   }
-  convertBtn.onclick=async()=>{
-    if(!files.length){window.dgdevToast('Add at least one file','error');return}
-    if(!convType){window.dgdevToast('Choose conversion type','error');return}
-    const [from,to]=convType.split('2');let count=0;
-    for(const f of files){
-      if(f.ext!==from)continue;
-      const text=await f.file.text();
-      let cues;
-      try{if(from==='srt')cues=parseSRT(text);else if(from==='vtt')cues=parseVTT(text);else cues=parseASS(text)}catch(e){continue}
-      if(!cues||!cues.length)continue;
-      let out;
-      if(to==='srt')out=serSRT(cues);else if(to==='vtt')out=serVTT(cues);else out=serASS(cues,colorPicker.value);
-      const base=f.name.replace(/\.[^.]+$/,'');
-      downloadText(out,`${base}_converted_DG-DEV.${to}`);
-      count++;await new Promise(r=>setTimeout(r,250));
+  updateFileList(); $('result').style.display='none'; hideStatus();
+}
+
+$('fileInput').addEventListener('change',e=>{addFiles([...e.target.files]);e.target.value='';});
+$('clearBtn').addEventListener('click',()=>{if(busy)return;selectedFiles=[];outputFiles=[];updateFileList();$('result').style.display='none';$('progressWrap').style.display='none';hideStatus();});
+const dz=$('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');addFiles([...e.dataTransfer.files]);});
+
+function updateConverterAccept() {
+    const type = document.getElementById('convertType').value;
+    let sourceExt = 'srt';
+    if(type.startsWith('vtt')) sourceExt = 'vtt';
+    else if(type.startsWith('ass')) sourceExt = 'ass';
+    
+    document.getElementById('fileInput').setAttribute('accept', `.${sourceExt},.zip`);
+}
+
+function parseSrt(text){
+  const lines=text.replace(/\r\n/g,'\n').split('\n'); const entries=[]; let i=0;
+  while(i<lines.length){
+    const line=lines[i].trim();
+    if(line.includes('-->')){
+      const parts=line.split('-->'); const start=parts[0].trim(); const end=parts[1].trim().split(' ')[0];
+      const textLines=[]; i++;
+      while(i<lines.length && lines[i].trim()!==''){ textLines.push(lines[i].trim()); i++; }
+      entries.push({ start, end, text: textLines.join('\n') });
+    } else { i++; }
+  }
+  return entries;
+}
+function parseVtt(text){
+  const lines=text.replace(/\r\n/g,'\n').split('\n'); const entries=[]; let i=0;
+  while(i<lines.length && !lines[i].includes('-->')) i++;
+  while(i<lines.length){
+    const line=lines[i].trim();
+    if(line.includes('-->')){
+      const parts=line.split('-->'); const start=parts[0].trim(); const end=parts[1].trim().split(' ')[0];
+      const textLines=[]; i++;
+      while(i<lines.length && lines[i].trim()!==''){ textLines.push(lines[i].trim()); i++; }
+      entries.push({ start, end, text: textLines.join('\n') });
+    } else { i++; }
+  }
+  return entries;
+}
+function parseAss(text){
+  const lines=text.replace(/\r\n/g,'\n').split('\n'); const entries=[]; let inEvents=false; let textIndex=9;
+  for(const raw of lines){
+    const line=raw.trim();
+    if(line.startsWith('[')){ inEvents=/\[Events\]/i.test(line); continue; }
+    if(inEvents && line.startsWith('Format:')){
+      const fields=line.substring(7).split(',').map(f=>f.trim().toLowerCase()); const idx=fields.indexOf('text'); if(idx!==-1) textIndex=idx;
     }
-    window.dgdevToast(count?`Converted ${count} file(s) ✅`:'No matching files',count?'success':'error');
+    if(line.startsWith('Dialogue:') && inEvents){
+      const body=line.substring(9).trim(); const parts=[]; let cur='',fieldCount=0;
+      for(let k=0;k<body.length;k++){
+        const ch=body[k];
+        if(ch===',' && fieldCount<textIndex){ parts.push(cur); cur=''; fieldCount++; } else cur+=ch;
+      }
+      parts.push(cur);
+      if(parts.length>=textIndex+1){
+        const start=parts[1].trim(); const end=parts[2].trim();
+        let text=parts[textIndex]; text=text.replace(/\{[^}]*\}/g,''); text=text.replace(/\\N/gi,'\n').replace(/\\n/gi,'\n');
+        entries.push({ start, end, text: text.trim() });
+      }
+    }
+  }
+  return entries;
+}
+
+function hexToAssColor(hex){
+  const c=hex.replace('#',''); const r=c.substring(0,2); const g=c.substring(2,4); const b=c.substring(4,6);
+  return `&H00${b}${g}${r}&`.toUpperCase();
+}
+
+function parseTimeToMs(str) {
+    let m = str.match(/(\d+):(\d+):(\d+)[,.](\d+)/);
+    if (m) {
+        let frac = m[4];
+        if (frac.length === 2) frac += '0';
+        else if (frac.length === 1) frac += '00';
+        else frac = frac.substring(0, 3);
+        return parseInt(m[1]) * 3600000 + parseInt(m[2]) * 60000 + parseInt(m[3]) * 1000 + parseInt(frac);
+    }
+    return 0;
+}
+
+function msToTargetTime(ms, format) {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    const msPart = ms % 1000;
+    
+    if (format === 'srt') return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')},${String(msPart).padStart(3,'0')}`;
+    if (format === 'vtt') return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(msPart).padStart(3,'0')}`;
+    if (format === 'ass') return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(Math.floor(msPart/10)).padStart(2,'0')}`;
+    return '';
+}
+
+function addEndWatermark(entries, targetFormat){
+  if(!entries || entries.length===0){
+      return [{ start: msToTargetTime(1000, targetFormat), end: msToTargetTime(5000, targetFormat), text: "[ DG-DEV · Converted ]", isWatermark: true }];
+  }
+  const copy = entries.slice();
+  
+  let maxMs = 0;
+  copy.forEach(e => {
+      let ms = parseTimeToMs(e.end);
+      if (ms > maxMs) maxMs = ms;
+  });
+  
+  const start = maxMs + 200;
+  const end = start + 4000;
+  
+  copy.push({
+      start: msToTargetTime(start, targetFormat),
+      end: msToTargetTime(end, targetFormat),
+      text: "[ DG-DEV · Converted ]",
+      isWatermark: true
+  });
+  return copy;
+}
+
+function generateSrt(entries, style){
+  const out=[];
+  entries.forEach((e,i)=>{
+    let text=e.text;
+    if(!e.isWatermark){
+      text=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      text=`<font face="${style.font}" size="${style.size}" color="${style.color}">${text}</font>`;
+    } else {
+      text=`<font color="#00f0ff">${text}</font>`;
+    }
+    out.push(`${i+1}\n${e.start} --> ${e.end}\n${text}\n`);
+  });
+  return out.join('\n');
+}
+
+function generateVtt(entries, style){
+  let out=['WEBVTT\n'];
+  entries.forEach((e,i)=>{
+    let text=e.text;
+    if(!e.isWatermark){
+      text=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      text=`<c.font><font face="${style.font}" size="${style.size}" color="${style.color}">${text}</font></c>`;
+    } else {
+      text=`<c.dgdev>${text}</c>`;
+    }
+    out.push(`${i+1}\n${e.start} --> ${e.end}\n${text}\n`);
+  });
+  return out.join('\n');
+}
+
+function generateAss(entries, style){
+  const hexCol=hexToAssColor(style.color);
+  let result=`[Script Info]
+Title: DG-DEV Converted Subtitle
+ScriptType: v4.00+
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+Collisions: Normal
+PlayResX: 384
+PlayResY: 288
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,${style.font},${style.size},${hexCol},&H000000FF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,2,2,2,10,10,10,1
+Style: DG-DEV,${style.font},14,&H00FFFF00,&H000000FF,&H00000000,&H80000000,0,-1,0,0,100,100,0,0,1,1,1,8,10,10,10,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+`;
+  entries.forEach(e=>{
+    let text=e.text.replace(/\n/g,'\\N');
+    if(e.isWatermark){
+      result+=`Dialogue: 1,${e.start},${e.end},DG-DEV,,0,0,0,,${text}\n`;
+    } else {
+      result+=`Dialogue: 0,${e.start},${e.end},Default,,0,0,0,,${text}\n`;
+    }
+  });
+  return result;
+}
+
+async function processSubtitle(file, sourceFormat, targetFormat, style){
+  const text=await file.text();
+  
+  let entries=[];
+  if(sourceFormat==='srt') entries=parseSrt(text);
+  else if(sourceFormat==='vtt') entries=parseVtt(text);
+  else if(sourceFormat==='ass' || sourceFormat==='ssa') entries=parseAss(text);
+  else throw new Error('Unsupported format: '+sourceFormat);
+
+  if(!entries.length) throw new Error(file.name+': No valid subtitle cues found.');
+
+  entries=addEndWatermark(entries, targetFormat);
+
+  let output='';
+  if(targetFormat==='srt') output=generateSrt(entries, style);
+  else if(targetFormat==='vtt') output=generateVtt(entries, style);
+  else if(targetFormat==='ass' || targetFormat==='ssa') output=generateAss(entries, style);
+
+  return { name:file.name.replace(/\.(srt|vtt|ass|ssa)$/i,'_DG-DEV.'+targetFormat), content:output };
+}
+
+async function expandFiles(files, expectedSourceExt){
+  const expanded=[];
+  for(const f of files){
+    if(f.name.toLowerCase().endsWith('.zip')){
+      if(typeof JSZip==='undefined') throw new Error('ZIP library could not load.');
+      const zip=await JSZip.loadAsync(f);
+      for(const [name,entry] of Object.entries(zip.files)){
+        if(entry.dir) continue;
+        const ext=name.split('.').pop().toLowerCase();
+        if(ext === expectedSourceExt){
+          const blob=await entry.async('blob');
+          expanded.push(new File([blob],name.split('/').pop(),{type:'text/plain'}));
+        }
+      }
+    } else {
+        const ext = f.name.split('.').pop().toLowerCase();
+        if (ext === expectedSourceExt) expanded.push(f);
+    }
+  }
+  if(!expanded.length) throw new Error(`No .${expectedSourceExt} files found in your selection or ZIP.`);
+  return expanded;
+}
+
+function setProgress(done,total,label){
+  const pct=total?Math.round(done/total*100):0;
+  $('progressWrap').style.display='block';$('progressBar').style.width=pct+'%';$('progressPct').textContent=pct+'%';$('progressLabel').textContent=label;
+}
+
+$('convertBtn').addEventListener('click',async()=>{
+  if(busy||!selectedFiles.length)return;
+  busy=true;outputFiles=[];$('result').style.display='none';hideStatus();$('convertBtn').disabled=true;$('convertBtn').textContent='Converting…';
+  
+  try{
+    const convertType = $('convertType').value;
+    let sourceFormat = 'srt';
+    let targetFormat = 'srt';
+    
+    if(convertType.startsWith('vtt')) sourceFormat = 'vtt';
+    if(convertType.startsWith('ass')) sourceFormat = 'ass';
+    if(convertType.endsWith('srt')) targetFormat = 'srt';
+    if(convertType.endsWith('ass')) targetFormat = 'ass';
+
+    const style = {
+      font: $('fontName').value,
+      size: $('fontSize').value,
+      color: $('fontColor').value
+    };
+
+    const files=await expandFiles(selectedFiles, sourceFormat);
+    
+    for(let i=0;i<files.length;i++){
+      setProgress(i, files.length, 'Converting '+files[i].name+'…');
+      const result=await processSubtitle(files[i], sourceFormat, targetFormat, style);
+      outputFiles.push(result);
+    }
+    
+    setProgress(files.length,files.length,'All subtitles converted');
+    $('resultText').textContent=outputFiles.length+' subtitle file(s) converted. Format and styling applied.';
+    $('result').style.display='block';showStatus('Conversion finished successfully. Download your files below.');
+  }catch(err){
+    console.error(err);
+    showStatus(err.message||'Something went wrong while converting.',true);
+  }finally{
+    busy=false;$('convertBtn').disabled=!selectedFiles.length;$('convertBtn').textContent='✦ Convert subtitles';
+  }
+});
+
+$('downloadBtn').addEventListener('click',async()=>{
+  if(!outputFiles.length)return;
+  
+  let customName = $('zipName').value.trim();
+  if(!customName) customName = "DG-DEV_Converted_Subtitles";
+  
+  if(outputFiles.length===1){
+    const f=outputFiles[0],blob=new Blob([f.content],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;
+    a.download = customName !== "DG-DEV_Converted_Subtitles" ? customName + '.' + f.name.split('.').pop() : f.name;
+    a.click();URL.revokeObjectURL(url);
+  }else{
+    if(typeof JSZip==='undefined'){showStatus('ZIP library is unavailable. Reload and try again.',true);return;}
+    if(!customName.toLowerCase().endsWith('.zip')) customName += '.zip';
+    
+    const zip=new JSZip();outputFiles.forEach((f)=>zip.file(f.name.replace(/^.*[\\/]/,''),f.content));
+    const blob=await zip.generateAsync({type:'blob'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=customName;a.click();URL.revokeObjectURL(url);
+  }
+});
+
+/* =====================================
+   SHARE MODAL LOGIC
+===================================== */
+const shareModal = $('shareModal');
+const shareUrlInput = $('shareUrl');
+const PAGE_SHARE_URL = "https://dg-dev-livid.vercel.app/subtitle-converter";
+
+$('shareOpen').addEventListener('click', () => {
+  shareUrlInput.value = PAGE_SHARE_URL;
+  shareModal.classList.add('show');
+});
+
+$('closeModal').addEventListener('click', () => shareModal.classList.remove('show'));
+
+shareModal.addEventListener('click', event => {
+  if (event.target === shareModal) shareModal.classList.remove('show');
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') shareModal.classList.remove('show');
+});
+
+$('copyBtn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(PAGE_SHARE_URL);
+    showToast('Page link copied successfully!');
+    shareModal.classList.remove('show');
+  } catch (err) {
+    const temp = document.createElement('textarea');
+    temp.value = PAGE_SHARE_URL;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand('copy');
+    temp.remove();
+    showToast('Page link copied successfully!');
+    shareModal.classList.remove('show');
+  }
+});
+
+$('nativeShare').addEventListener('click', async () => {
+  const shareData = {
+    title: "DG-DEV Subtitle Converter",
+    text: "Convert your subtitles with DG-DEV.",
+    url: PAGE_SHARE_URL
   };
-  function parseSRT(t){return t.replace(/\r/g,'').trim().split(/\n\s*\n/).map(b=>{const L=b.split('\n'),tl=L.find(l=>l.includes('-->'));if(!tl)return null;const[s,e]=tl.split('-->').map(x=>x.trim());return{start:pT(s,','),end:pT(e,','),text:L.slice(L.indexOf(tl)+1).join('\n')}}).filter(Boolean)}
-  function parseVTT(t){return t.replace(/\r/g,'').replace(/^WEBVTT[^\n]*\n/,'').trim().split(/\n\s*\n/).map(b=>{const L=b.split('\n'),i=L.findIndex(l=>l.includes('-->'));if(i<0)return null;const[s,e]=L[i].split('-->').map(x=>x.trim().split(' ')[0]);return{start:pT(s,'.'),end:pT(e,'.'),text:L.slice(i+1).join('\n')}}).filter(Boolean)}
-  function parseASS(t){const L=t.replace(/\r/g,'').split('\n'),ev=[];let inEv=false;for(const l of L){if(l.startsWith('[Events]')){inEv=true;continue}if(inEv&&l.startsWith('[')&&l!=='[Events]')break;if(inEv&&l.startsWith('Dialogue:')){const p=l.substring(9).split(',');if(p.length>=10)ev.push({start:pT(p[1].trim(),'.'),end:pT(p[2].trim(),'.'),text:p.slice(9).join(',').replace(/\\N/g,'\n').replace(/\{[^}]*\}/g,'')})}}return ev}
-  function pT(t,sep){const p=t.split(':');if(p.length===3){const[h,m]=p,[s,ms]=p[2].split(sep);return(h*3600+m*60+ +s)*1000+(+ms||0)*(ms&&ms.length===2?10:1)}return 0}
-  const pad=n=>String(n).padStart(2,'0');
-  function fSRT(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000),r=ms%1000;return`${pad(h)}:${pad(m)}:${pad(s)},${String(r).padStart(3,'0')}`}
-  function fVTT(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000),r=ms%1000;return`${pad(h)}:${pad(m)}:${pad(s)}.${String(r).padStart(3,'0')}`}
-  function fASS(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000),c=Math.floor(ms%1000/10);return`${h}:${pad(m)}:${pad(s)}.${pad(c)}`}
-  function serSRT(c){return c.map((x,i)=>`${i+1}\n${fSRT(x.start)} --> ${fSRT(x.end)}\n${x.text}`).join('\n\n')}
-  function serVTT(c){return`WEBVTT\n\n`+c.map(x=>`${fVTT(x.start)} --> ${fVTT(x.end)}\n${x.text}`).join('\n\n')}
-  function serASS(c,hex){const col=hexToASS(hex);return`[Script Info]\nTitle: DG-DEV Converted\nScriptType: v4.00+\nPlayResX: 1920\nPlayResY: 1080\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\nStyle: Default,Arial,56,${col},&H000000FF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,2,2,2,10,10,30,1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n`+c.map(x=>`Dialogue: 0,${fASS(x.start)},${fASS(x.end)},Default,,0,0,0,,${x.text.replace(/\n/g,'\\N')}`).join('\n')}
-  function hexToASS(h){h=h.replace('#','');return`&H00${h.substring(4,6)}${h.substring(2,4)}${h.substring(0,2)}`.toUpperCase()}
-  function downloadText(t,n){const b=new Blob([t],{type:'text/plain'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-})();
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        showToast("Sharing was not completed.", true);
+      }
+    }
+  } else {
+    try {
+      await navigator.clipboard.writeText(PAGE_SHARE_URL);
+      showToast("Page link copied successfully!");
+      shareModal.classList.remove('show');
+    } catch (err) {
+      showToast("Sharing is not supported on this browser.", true);
+    }
+  }
+});
+
+// Init accept attribute
+updateConverterAccept();
 </script>
 </body>
 </html>
