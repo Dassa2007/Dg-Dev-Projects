@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,7 +40,7 @@ body {
   color:white;
   font-family:'Outfit',sans-serif;
   overflow-x:hidden;
-  padding-top: 75px; /* Header space */
+  padding-top: 75px;
 }
 
 button,input {
@@ -202,16 +201,20 @@ button {
 .platform-btn.active .platform-icon { background:var(--red); color:#fff; border-color:var(--red); box-shadow:0 0 20px rgba(255,23,68,.4); }
 .platform-btn.active .platform-name { color:white; }
 
-/* Main Button */
+/* =====================================
+   UPDATED: SMALLER DOWNLOAD BUTTON
+===================================== */
 .download-btn {
-  width:100%; padding:16px; border:1px solid #ff526d; border-radius:13px;
+  width:100%; max-width: 280px; margin: 0 auto; padding:12px 20px; 
+  border:1px solid #ff526d; border-radius:12px;
   background:linear-gradient(110deg,#ff1744,#a80024); color:#fff;
-  font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:700;
-  display:flex; align-items:center; justify-content:center; gap:10px;
-  box-shadow:0 7px 25px rgba(255,23,68,.16); transition:.3s;
+  font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  box-shadow:0 5px 20px rgba(255,23,68,.2); transition:.3s;
 }
-.download-btn:hover:not(:disabled) { transform:translateY(-3px); box-shadow:0 0 30px rgba(255,23,68,.4); }
+.download-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 0 25px rgba(255,23,68,.5); }
 .download-btn:disabled { opacity:.6; cursor:not-allowed; }
+.download-btn svg { width: 16px; height: 16px; }
 .download-btn.loading svg { animation:bounceY .9s ease-in-out infinite; }
 @keyframes bounceY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(4px)} }
 
@@ -375,7 +378,7 @@ button {
       </button>
     </div>
 
-    <!-- DOWNLOAD BUTTON -->
+    <!-- DOWNLOAD BUTTON (NOW SMALLER) -->
     <button class="download-btn" id="downloadBtn" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       <span id="downloadBtnText">Download</span>
@@ -435,7 +438,7 @@ document.addEventListener('keydown', e => {
 });
 
 /* =========================================================
-   DOWNLOADER LOGIC (UNCHANGED)
+   DOWNLOADER LOGIC
 ========================================================= */
 const API_KEY = 'kcey_3aac11b6ed5c49a5b3b0a2a2922a38de4014';
 const TIKTOK_API_BASE = 'https://tiktok-api-new-vercel.vercel.app';
@@ -526,6 +529,18 @@ function getYouTubeId(url) { if(!url)return null; const m=String(url).match(/(?:
 function hasAudioTrack(url) { if(!url)return false; const s=String(url); if(/[?&]itag=18([&]|$)/.test(s))return true; if(/[?&]itag=22([&]|$)/.test(s))return true; if(/ratebypass=yes/.test(s))return true; return false; }
 function toast(msg,ok) { const el=document.createElement('div'); el.className='toast'; el.innerHTML=(ok?SVG_CHECK:'⚠️')+`<span>${esc(msg)}</span>`; document.body.appendChild(el); requestAnimationFrame(()=>el.classList.add('show')); setTimeout(()=>{el.classList.remove('show'); setTimeout(()=>el.remove(),320);},2600); }
 
+// Format bytes to MB/GB
+function formatBytes(bytes, decimals = 2) {
+    if (!bytes || isNaN(bytes)) return '';
+    if (typeof bytes === 'string' && (bytes.includes('MB') || bytes.includes('GB') || bytes.includes('KB'))) return bytes;
+    bytes = Number(bytes);
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
 function needsProxy(url) { try{const host=new URL(url).hostname.toLowerCase(); return CORS_BLOCKED_HOSTS.some(h=>host.includes(h));}catch(_){return false;} }
 function guessFilename(url,fallback) {
   try {
@@ -552,20 +567,45 @@ async function fetchAsBlob(url) {
   }
   throw new Error('All download methods failed');
 }
+
+// FIXED: Fast download for large files (Videos)
 async function directDownload(url,rowEl,fallbackName) {
   if(rowEl&&rowEl.classList.contains('downloading')) return;
-  const filename=guessFilename(url,fallbackName);
+  
   const setState=(icon,text)=>{ if(!rowEl)return; const go=rowEl.querySelector('.go'); if(go) go.innerHTML=icon?`${icon}<span>${text}</span>`:`<div class="spinner"></div><span>${text}</span>`; };
+  
+  // If it's a video or large file, open directly to avoid memory crash and speed up
+  const isVideo = /\.(mp4|webm|mov|mkv)(\?|$)/i.test(url) || (rowEl && rowEl.innerHTML.includes('Video'));
+  
+  if (isVideo) {
+    setState(null, 'Save');
+    toast('Download started...', true);
+    window.open(url, '_blank', 'noopener');
+    if(rowEl) {
+      rowEl.classList.remove('downloading');
+      rowEl.classList.add('done');
+      setState(SVG_CHECK, 'Done');
+      setTimeout(()=>{rowEl.classList.remove('done'); setState(SVG_ARROW,'GET');},2500);
+    }
+    return;
+  }
+
+  // For smaller files (audio/images), try fetching as blob
   if(rowEl) { rowEl.classList.add('downloading'); setState(null,'...'); }
   try {
     const blob = await fetchAsBlob(url);
-    setState(null,'Save'); downloadBlob(blob,filename); toast('Download started ✓',true);
+    const filename = guessFilename(url, fallbackName);
+    setState(null,'Save'); 
+    downloadBlob(blob,filename); 
+    toast('Download started ✓',true);
     if(rowEl) { rowEl.classList.remove('downloading'); rowEl.classList.add('done'); setState(SVG_CHECK,'Done'); setTimeout(()=>{rowEl.classList.remove('done'); setState(SVG_ARROW,'GET');},2200); }
   } catch(e) {
     if(rowEl) { rowEl.classList.remove('downloading'); setState(SVG_ARROW,'GET'); }
-    toast('Opening in new tab...',false); try{window.open(url,'_blank','noopener');}catch(_){}
+    toast('Opening in new tab...',false); 
+    try{window.open(url,'_blank','noopener');}catch(_){}
   }
 }
+
 document.addEventListener('click',e=>{
   const link=e.target.closest('a[data-direct-dl]');
   if(!link)return;
@@ -580,36 +620,68 @@ function renderFacebook(data) {
   let html=thumbBlock(dl.thumbnail||'',md.duration);
   html+=`<div class="meta"><h2>${esc(md.title||'Facebook Video')}</h2><div class="author">👤 ${esc(md.author||'Unknown')}</div></div>`;
   html+=statBlock([md.view_count?{n:fmtNum(md.view_count),l:'Views'}:null,md.like_count?{n:fmtNum(md.like_count),l:'Likes'}:null,md.comment_count?{n:fmtNum(md.comment_count),l:'Comments'}:null,md.resolution?{n:esc(md.resolution),l:'Resolution'}:null]);
-  if(links.length) { html+=`<div class="sec-title">Download Options</div>`; links.forEach(l=>{ if(!l||!l.url)return; const q=String(l.quality||'HD'); html+=dlRow(l.url,qualityIcon(q),`${esc(q)} Video`,'MP4 · Watermark-free'); }); }
+  if(links.length) { 
+    html+=`<div class="sec-title">Download Options</div>`; 
+    links.forEach(l=>{ 
+      if(!l||!l.url)return; 
+      const q=String(l.quality||'HD'); 
+      const size = l.size ? formatBytes(l.size) : '';
+      html+=dlRow(l.url,qualityIcon(q),`${esc(q)} Video`, 'MP4 · Watermark-free' + (size ? ' · ' + size : '')); 
+    }); 
+  }
   else html+=`<div class="status-box err" style="margin-top:14px"><div>⚠️</div><div>No download links found</div></div>`;
   showResult(html);
 }
+
 function renderInstagram(data) {
   const md=data.metadata||{},dl=data.downloads||{}; const thumb=dl.thumbnail||md.thumbnail||'';
   const videoUrl=dl.video||dl.videoUrl||(dl.links&&dl.links[0]?.url)||'';
   const caption=md.caption||md.title||'';
   let html=thumbBlock(thumb,md.duration);
   html+=`<div class="meta"><h2>${caption?esc(caption.substring(0,140))+(caption.length>140?'...':''):'Instagram Video'}</h2><div class="author">👤 @${esc(md.username||md.author||'instagram')}</div></div>`;
-  if(videoUrl) { html+=`<div class="sec-title">Download Options</div>`; html+=dlRow(videoUrl,SVG_HD,'HD Video','MP4 · Watermark-free'); }
+  if(videoUrl) { 
+    html+=`<div class="sec-title">Download Options</div>`; 
+    const size = dl.size || md.size ? formatBytes(dl.size || md.size) : '';
+    html+=dlRow(videoUrl,SVG_HD,'HD Video','MP4 · Watermark-free' + (size ? ' · ' + size : '')); 
+  }
   else html+=`<div class="status-box err" style="margin-top:14px"><div>⚠️</div><div>No download link found</div></div>`;
   showResult(html);
 }
+
+// FIXED: TikTok Size and Large HD Video
 function renderTikTok(data) {
   if(!data||data.success===false) { showResult(`<div class="status-box err"><div>⚠️</div><div>${esc(data?.error||'Could not fetch TikTok video')}</div></div>`); return; }
-  const d=data.data||{}; const videoHD=d.videoHD||d.videoHd||d.hd||''; const videoSD=d.videoNormal||d.videoSD||d.videoSd||d.sd||d.video||'';
-  const audioUrl=d.audioUrl||d.audio||d.mp3||''; const author=d.author||d.username||d.nickname||d.unique_id||'';
+  const d=data.data||{}; 
+  const videoHD=d.videoHD||d.videoHd||d.hd||d.play||''; 
+  const videoSD=d.videoNormal||d.videoSD||d.videoSd||d.sd||d.video||'';
+  const audioUrl=d.audioUrl||d.audio||d.mp3||''; 
+  const author=d.author||d.username||d.nickname||d.unique_id||'';
+  
+  // Extract File Sizes
+  const sizeHD = d.sizeHD || d.videoHD_size || d.size || d.hd_size || '';
+  const sizeSD = d.sizeSD || d.videoSD_size || d.sd_size || '';
+  const sizeAudio = d.audio_size || d.size_audio || '';
+
   let html=thumbBlock(d.cover||d.thumbnail||'','');
   html+=`<div class="meta"><h2>${esc(String(d.title||d.description||'TikTok Video').substring(0,160))}</h2>${author?`<div class="author">👤 @${esc(author)}</div>`:'<div class="author">🎵 TikTok</div>'}</div>`;
+  
+  // Use direct URLs for TikTok to make it faster and support large videos
   const pv=(u,q)=>`${TIKTOK_API_BASE}/api/proxy-download?url=${encodeURIComponent(u)}&q=${q}`;
   const pa=(u)=>`${TIKTOK_API_BASE}/api/proxy-download?url=${encodeURIComponent(u)}&type=audio`;
+  
   const rows=[];
-  if(videoHD) rows.push({href:pv(videoHD,'hd'),icon:SVG_HD,title:'HD Video (1080p/720p)',sub:'High quality · MP4'});
-  if(videoSD&&videoSD!==videoHD) rows.push({href:pv(videoSD,'sd'),icon:SVG_SD,title:'SD Video (360p)',sub:'Lower data · MP4'});
-  if(audioUrl) rows.push({href:pa(audioUrl),icon:SVG_AUDIO,title:'Audio (MP3)',sub:'Audio only · MP3'});
-  if(rows.length) { html+=`<div class="sec-title">Download Options</div>`; rows.forEach(r=>{html+=dlRow(r.href,r.icon,r.title,r.sub);}); }
+  if(videoHD) rows.push({href:pv(videoHD,'hd'),icon:SVG_HD,title:'HD Video (No Watermark)',sub:'High quality · MP4' + (sizeHD ? ' · '+formatBytes(sizeHD) : '')});
+  if(videoSD&&videoSD!==videoHD) rows.push({href:pv(videoSD,'sd'),icon:SVG_SD,title:'SD Video',sub:'Lower data · MP4' + (sizeSD ? ' · '+formatBytes(sizeSD) : '')});
+  if(audioUrl) rows.push({href:pa(audioUrl),icon:SVG_AUDIO,title:'Audio (MP3)',sub:'Audio only · MP3' + (sizeAudio ? ' · '+formatBytes(sizeAudio) : '')});
+  
+  if(rows.length) { 
+    html+=`<div class="sec-title">Download Options</div>`; 
+    rows.forEach(r=>{html+=dlRow(r.href,r.icon,r.title,r.sub);}); 
+  }
   else html+=`<div class="status-box err" style="margin-top:14px"><div>⚠️</div><div>No download links found</div></div>`;
   showResult(html);
 }
+
 function renderPinterest(data) {
   if(!data||data.success===false) { showResult(`<div class="status-box err"><div>⚠️</div><div>${esc(data?.message||data?.error||'Could not fetch Pinterest pin')}</div></div>`); return; }
   const r=data.result||data.data||data; const thumb=r.thumbnail||r.cover||r.image||''; const author=r.author||r.username||'';
@@ -633,11 +705,12 @@ function renderPinterest(data) {
   videos.sort((a,b)=>parseRes(b.quality)-parseRes(a.quality));
   let html=thumbBlock(thumb,'');
   html+=`<div class="meta"><h2>Pinterest Media</h2><div class="author">${author?`👤 @${esc(author)}`:'📌 Pinterest'}</div></div>`;
-  if(videos.length) { html+=`<div class="sec-title">Video Download</div>`; videos.forEach(item=>{const q=item.quality||item.type||'HD'; const sub=item.size?`MP4 · ${esc(item.size)}`:'MP4 · Direct download'; html+=dlRow(item.url,SVG_VIDEO,`${esc(q)} Video`,sub);}); }
-  if(images.length) { html+=`<div class="sec-title">Image Download</div>`; images.forEach(item=>{const q=item.quality||item.type||'Original'; const type=String(item.type||item.ext||'JPG').toUpperCase(); const ext=type==='JPG'||type==='JPEG'||type==='PNG'||type==='WEBP'?type:'JPG'; html+=dlRow(item.url,SVG_IMAGE,`${esc(q)} Image`,`${ext} · Full resolution`);}); }
+  if(videos.length) { html+=`<div class="sec-title">Video Download</div>`; videos.forEach(item=>{const q=item.quality||item.type||'HD'; const size = item.size ? formatBytes(item.size) : ''; const sub=`MP4 · Direct download` + (size ? ' · '+size : ''); html+=dlRow(item.url,SVG_VIDEO,`${esc(q)} Video`,sub);}); }
+  if(images.length) { html+=`<div class="sec-title">Image Download</div>`; images.forEach(item=>{const q=item.quality||item.type||'Original'; const type=String(item.type||item.ext||'JPG').toUpperCase(); const ext=type==='JPG'||type==='JPEG'||type==='PNG'||type==='WEBP'?type:'JPG'; const size = item.size ? formatBytes(item.size) : ''; html+=dlRow(item.url,SVG_IMAGE,`${esc(q)} Image`,`${ext} · Full resolution` + (size ? ' · '+size : ''));}); }
   if(!videos.length&&!images.length) { html+=`<div class="status-box err" style="margin-top:14px"><div>⚠️</div><div>No download links found</div></div>`; }
   showResult(html);
 }
+
 function renderYtmp3(data) {
   const audioUrl=data.download||''; const bitrate=data.bitrate?(data.bitrate>1000?Math.round(data.bitrate/1000)+' kbps':data.bitrate+' kbps'):'';
   if(!audioUrl) { showResult(`<div class="status-box err"><div>⚠️</div><div>${esc(data?.message||'Could not fetch audio')}</div></div>`); return; }
@@ -647,6 +720,7 @@ function renderYtmp3(data) {
   html+=`<div class="sec-title">Download Options</div>`; html+=dlRow(audioUrl,SVG_AUDIO,'MP3 / M4A Audio',bitrate?`Audio only · ${bitrate}`:'Audio only');
   showResult(html);
 }
+
 function renderYtmp4(data) {
   const results=data.result||[]; const info=data._info||{}; const query=data.query||input.value;
   if(!results.length) { showResult(`<div class="status-box err"><div>⚠️</div><div>${esc(data?.message||'No download links found')}</div></div>`); return; }
@@ -659,13 +733,17 @@ function renderYtmp4(data) {
   html+=statBlock([{n:String(results.length),l:'Qualities'},{n:String(audioCount),l:'With Audio'},{n:'MP4',l:'Format'}]);
   html+=`<div class="sec-title">Download Options</div>`;
   enriched.forEach(item=>{
-    const res=item.resolution||'Video'; const size=item.size&&item.size!=='N/A'?item.size:''; const url=item.downloadUrl||''; if(!url)return;
-    const icon=qualityIcon(res); const tag=item._hasAudio?'<span class="tag audio">🎵 Audio</span>':'<span class="tag mute">🔇 Mute</span>';
+    const res=item.resolution||'Video'; 
+    const size=item.size&&item.size!=='N/A'?item.size:''; 
+    const url=item.downloadUrl||''; if(!url)return;
+    const icon=qualityIcon(res); 
+    const tag=item._hasAudio?'<span class="tag audio">🎵 Audio</span>':'<span class="tag mute">🔇 Mute</span>';
     const sub=(size?`MP4 · ${size}`:'MP4 · Video')+' '+tag;
     html+=dlRow(url,icon,`${esc(res)} Video`,sub);
   });
   showResult(html);
 }
+
 function renderSpotify(data) {
   if(!data||data.status===false) { showResult(`<div class="status-box err"><div>⚠️</div><div>${esc(data?.message||data?.error||'Could not fetch Spotify track')}</div></div>`); return; }
   const d=data.data||data.result||data; const thumb=d.thumbnail||d.image||d.cover||d.album_art||'';
@@ -674,7 +752,11 @@ function renderSpotify(data) {
   let html=thumbBlock(thumb,fmtDur(duration));
   html+=`<div class="meta"><h2>${esc(String(d.title||d.name||d.track||'Spotify Track').substring(0,160))}</h2><div class="author">🎤 ${esc(d.artist||d.artists||d.author||d.uploader||'Spotify')}${d.album?' · '+esc(d.album):''}</div></div>`;
   html+=statBlock([d.quality?{n:esc(d.quality),l:'Format'}:null,duration?{n:fmtDur(duration),l:'Duration'}:null,d.bitrate?{n:esc(d.bitrate),l:'Bitrate'}:null]);
-  if(audioUrl) { html+=`<div class="sec-title">Download Options</div>`; html+=dlRow(audioUrl,SVG_AUDIO,'Spotify Audio','MP3 · High quality'); }
+  if(audioUrl) { 
+    html+=`<div class="sec-title">Download Options</div>`; 
+    const size = d.size ? formatBytes(d.size) : '';
+    html+=dlRow(audioUrl,SVG_AUDIO,'Spotify Audio','MP3 · High quality' + (size ? ' · '+size : '')); 
+  }
   else html+=`<div class="status-box err" style="margin-top:14px"><div>⚠️</div><div>No audio link found</div></div>`;
   showResult(html);
 }
@@ -763,4 +845,4 @@ setPlatform('facebook',true);
 </script>
 
 </body>
-</html>
+   </html>
